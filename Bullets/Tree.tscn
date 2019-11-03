@@ -6,16 +6,18 @@
 [sub_resource type="RectangleShape2D" id=1]
 extents = Vector2( 5, 2.5 )
 
-[node name="Tree" type="RigidBody2D"]
+[node name="Tree" type="RigidBody2D" groups=[
+"OxygenGivers",
+]]
 collision_layer = 3
 collision_mask = 3
-continuous_cd = 1
+continuous_cd = 2
 contacts_reported = 1
 contact_monitor = true
 script = ExtResource( 1 )
 
 [node name="Sprite" type="Sprite" parent="."]
-scale = Vector2( 1.24526, 0.613409 )
+scale = Vector2( 0.15, 0.075 )
 texture = ExtResource( 2 )
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]

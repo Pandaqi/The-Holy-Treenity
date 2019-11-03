@@ -76,11 +76,13 @@ func shoot(dir):
 	if dir == Vector2.ZERO:
 		dir = transform[0]
 	
+	dir = dir.normalized()
+	
 	# create a new tree
 	var new_tree = tree_bullet.instance()
 	
 	# rotate it to face the direction it's flying in
-	var angle = acos( dir.normalized().dot(Vector2(1,0)) )
+	var angle = acos( dir.dot(Vector2(1,0)) )
 	new_tree.set_rotation(-angle)
 	
 	# position it just outside of our player rectangle
@@ -94,10 +96,10 @@ func shoot(dir):
 	# BUG:
 	# Shooting sideways generates the wrong angles?
 	
-	new_tree.set_position( get_position() + dir.normalized() * (tree_size + player_size))
+	new_tree.set_position( get_position() + dir * (tree_size + player_size))
 	
 	# add impulse to tree
-	new_tree.apply_central_impulse(dir * 10)
+	new_tree.apply_central_impulse(dir * 500)
 	
 	# finally, add tree to the world
 	get_node("/root/Node2D").call_deferred("add_child", new_tree)

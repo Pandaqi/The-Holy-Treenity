@@ -37,33 +37,38 @@ func _integrate_forces(state):
 	# Slowly scale the collision shape upwards
 	# TO DO: Also scale the sprite
 	var old_scale = $CollisionShape2D.shape.get_extents()
+	var scale_speed = 1.1
 	if old_scale.x <= 40:
-		$CollisionShape2D.shape.set_extents(old_scale * 1.05)
+		$Sprite.set_scale( $Sprite.get_scale() * scale_speed)
+		$CollisionShape2D.shape.set_extents(old_scale * scale_speed)
 	
 	# Check for collisions
 	if not turned_static:
 		for i in range(state.get_contact_count()):
 			var contact_pos = state.get_contact_local_position(i)
-			
-			print(contact_pos)
-			
+
 			fix_tree( contact_pos, state.get_contact_collider_object(i) )
 
 func fix_tree(pos, body):
 	print("Hit something")
 	
-	# TO DO: Check if it's actually something we can attach to
-	#  => If so, set mode to static
-	#  => If not, bounce off!
+	# TO DO:
+	# Replace it with a STATIC body, with the same size
+	
+	# Quickly create a body to attach to
+	var temp_body = StaticBody2D.new()
+	
+	temp_body.set_position(pos)
+	get_node("/root/Node2D").add_child(temp_body)
 	
 	# Create joint
 	var pin_joint = PinJoint2D.new()
 	
 	pin_joint.set_position( pos )
 	
-	pin_joint.set_node_a(body.get_path())
-	pin_joint.set_node_b(self.get_path())
-	pin_joint.disable_collision = false
+	pin_joint.set_node_a(self.get_path())
+	pin_joint.set_node_b(temp_body.get_path())
+	pin_joint.disable_collision = true
 	pin_joint.bias = 0.2
 	
 	get_node("/root/Node2D").add_child(pin_joint)
