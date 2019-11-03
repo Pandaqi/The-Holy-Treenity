@@ -9,6 +9,13 @@ var exit_thread = false
 var grid = []
 export (Vector2) var MAP_SIZE = Vector2(32, 32)
 
+# Water properties
+var MaxMass = 1.0 # The normal, un-pressurized mass of a full water cell
+var MaxCompress = 0.02 # How much excess water a cell can store, compared to the cell above it
+var MinMass = 0.0001  # Ignore cells that are almost dry
+var MinFlow = 0.01 # ?? Every time we flow water, flow at least this value
+var MaxSpeed = 1.0 # ??
+
 # The thread will start here.
 func _ready():
 	
@@ -27,11 +34,16 @@ func _ready():
 		grid[y] = []
 		grid[y].resize(MAP_SIZE.x)
 		for x in range(MAP_SIZE.x):
-			grid[y][x] = rand_range(0,1)
+			# What do these values mean?
+			#  Index 0 =  oxygen levels (the inverse is the carbon level)
+			#  Index 1 =  temperature levels
+			#  Index 2 =  water levels
+			grid[y][x] = [rand_range(0,1), rand_range(0,1), 0]
 			
 			# Check if there is a block on this tile
 			if tilemap.get_cell(x, y) > -1:
-				grid[y][x] = -1
+				# If so, make this block impenetrable
+				grid[y][x] = []
 	
 	###
 	# Thread stuff
@@ -77,13 +89,18 @@ func _thread_function(userdata):
 func calculate_new_grid(impulses):
 	# TO DO: Do something with changes given to us
 	
+	var gas_bounds = [Vector2(0.0, 1.0), Vector2(0.0, 1.0), Vector2(0, 8)]
+	
 	# For each impulse, set pressure to 1.0
 	for imp in impulses:
 		var cell = imp[0]
 		var change = imp[1]
+		var gas_type = imp[2]
+		
 		var cur_val = grid[cell.y][cell.x]
 		
-		grid[cell.y][cell.x] = clamp(cur_val + change, 0.0, 1.0)
+		if cur_val.size() > 0:
+			grid[cell.y][cell.x][gas_type] = clamp(cur_val[gas_type] + change, gas_bounds[gas_type].x, gas_bounds[gas_type].y)
 	
 	semaphore.post() # tell thread to update
 
@@ -97,45 +114,173 @@ func new_generation():
 		for x in range(MAP_SIZE.x):
 			# for this cell, loop through neighbours ...
 			var cur_cell = Vector2(x,y)
-			var old_val = old_grid[y][x]
-			var cur_val = old_grid[y][x]
+			var old_val = old_grid[y][x].duplicate()
+			var cur_val = old_grid[y][x].duplicate()
 			
 			# if we're impenetrable, don't consider us
-			if cur_val < 0:
+			if cur_val.size() == 0:
 				continue
 			
-			for a in range(-1,2):
-				for b in range(-1,2):
-					if a == 0 and b == 0:
-						continue
-					
-					# get neighbour cell
-					var neighbour = cur_cell + Vector2(a,b)
-					
-					# wrap values around the edges
-					if neighbour.x >= MAP_SIZE.x: neighbour.x -= MAP_SIZE.x
-					if neighbour.x < 0: neighbour.x += MAP_SIZE.x
-					if neighbour.y >= MAP_SIZE.y: neighbour.y -= MAP_SIZE.y
-					if neighbour.y < 0: neighbour.y += MAP_SIZE.y
-					
-					# get value that belongs to this neighbour
-					var neighbour_val = old_grid[neighbour.y][neighbour.x]
-					
-					# if this neighbour is impenetrable, don't consider it
-					if neighbour_val < 0:
-						continue
-					
-					# get the pressure difference between cells					
-					#  => if the other cell has lower pressure, we should remove some of our own
-					#  => if the other cel has higher pressure, we should add something to our own
-					# NOTE: we must make sure that we remove/add the same value on both sides
-					cur_val += 0.1 * (neighbour_val - old_val)
-			
-			# clamp the value between 0 and 1
-			cur_val = clamp(cur_val, 0.0, 1.0) 
-			
+			for gas in range(2):
+				# OXYGEN and HEAT have pretty default code
+				for a in range(-1,2):
+					for b in range(-1,2):
+						if a == 0 and b == 0:
+							continue
+						
+						# get neighbour cell
+						var neighbour = cur_cell + Vector2(a,b)
+						
+						# wrap values around the edges
+						if neighbour.x >= MAP_SIZE.x: neighbour.x -= MAP_SIZE.x
+						if neighbour.x < 0: neighbour.x += MAP_SIZE.x
+						if neighbour.y >= MAP_SIZE.y: neighbour.y -= MAP_SIZE.y
+						if neighbour.y < 0: neighbour.y += MAP_SIZE.y
+						
+						# get value that belongs to this neighbour
+						var neighbour_val = old_grid[neighbour.y][neighbour.x].duplicate()
+						
+						# if this neighbour is impenetrable, don't consider it
+						if neighbour_val.size() == 0:
+							continue
+							
+						# carbon/oxygen and heat spreads evenly
+						if gas == 0 or gas == 1:
+							# get the  difference between cells => use that to slowly equalize values
+							# NOTE: we must make sure that we remove/add the same value on both sides
+							cur_val[gas] += 0.1 * (neighbour_val[gas] - old_val[gas])
+				
+				# clamp the value between 0 and 1
+				cur_val[gas] = clamp(cur_val[gas], 0.0, 1.0)
+				
 			# finally add the new value into the NEW grid
 			grid[y][x] = cur_val
+	
+	###
+	#
+	# WATER SIMULATION
+	#
+	###
+	
+	var flow = 0
+	var remaining_mass = 0
+  
+	# Create empty array for new masses
+	var new_mass = []
+	new_mass.resize(MAP_SIZE.y)
+	for y in range(MAP_SIZE.y):
+		new_mass[y] = []
+		new_mass[y].resize(MAP_SIZE.x)
+		for x in range(MAP_SIZE.x):
+			if grid[y][x].size() == 0 or grid[y][x][2] < MinMass:
+				new_mass[y][x] = 0
+			else:
+				new_mass[y][x] = old_grid[y][x][2]
+
+	# Calculate and apply flow for each block
+	for y in range(MAP_SIZE.y):
+		for x in range(MAP_SIZE.x):
+			# skip impenetrable blocks
+			if grid[y][x].size() == 0:
+				continue
+    
+			# set flow and mass variables
+			flow = 0
+			remaining_mass = old_grid[y][x][2]
+	
+			# if we don't have water, continue!
+			if remaining_mass <= 0: continue
+	
+			# cache the positions of our neighbours
+			var ind_left = (x - 1) % int(MAP_SIZE.x)
+			var ind_below = (y + 1) % int(MAP_SIZE.y)
+			var ind_right = (x + 1) % int(MAP_SIZE.x)
+			var ind_above = (y - 1) % int(MAP_SIZE.y)
+	    
+			###
+			# Check block below
+			###
+			if grid[ind_below][x].size() > 0:
+				flow = get_stable_state_b( remaining_mass + old_grid[ind_below][x][2] ) - old_grid[ind_below][x][2]
+	     
+				# ... doing this leads to a smoother flow
+				if flow > MinFlow: flow *= 0.5
+	
+				# clamp flow
+				flow = clamp( flow, 0, min(MaxSpeed, remaining_mass) )
+	    
+				# update values
+				new_mass[y][x] -= flow
+				new_mass[ind_below][x] += flow   
+				remaining_mass -= flow
+	    
+			if remaining_mass <= 0: continue
+	  
+			###
+			# Check block to the left
+			###
+			if grid[y][ind_left].size() > 0:
+				# equalize the amount of water in this block and it's neighbour
+				flow = (old_grid[y][x][2] - old_grid[y][ind_left][2]) * 0.25
+	    
+				if flow > MinFlow: flow *= 0.5
+				flow = clamp(flow, 0, remaining_mass)
+	       
+				new_mass[y][x] -= flow
+				new_mass[y][ind_left] += flow
+				remaining_mass -= flow
+	    
+			if remaining_mass <= 0: continue
+			
+			###
+			# Check block to the right
+			###
+			if grid[y][ind_right].size() > 0:
+				# equalize the amount of water in this block and it's neighbour
+				flow = (old_grid[y][x][2] - old_grid[y][ind_right][2]) * 0.25
+	    
+				if flow > MinFlow: flow *= 0.5
+				flow = clamp(flow, 0, remaining_mass)
+	       
+				new_mass[y][x] -= flow
+				new_mass[y][ind_right] += flow
+				remaining_mass -= flow
+	    
+			if remaining_mass <= 0: continue
+	
+			###
+			# Check block above
+			#
+			#   => Only compressed water flows upwards.
+			###
+			if grid[ind_above][x].size() > 0:
+				flow = remaining_mass - get_stable_state_b( remaining_mass + old_grid[ind_above][x][2] )
+	    
+				if flow > MinFlow: flow *= 0.5
+				flow = clamp( flow, 0, min(MaxSpeed, remaining_mass) )
+	    
+				# update values
+				new_mass[y][x] -= flow
+				new_mass[ind_above][x] += flow   
+				remaining_mass -= flow
+	
+	# Copy the new mass values to the mass array
+	for y in range(MAP_SIZE.y):
+		for x in range(MAP_SIZE.x):
+			if grid[y][x].size() == 0:
+				continue
+			
+			grid[y][x][2] = new_mass[y][x]
+   
+
+func get_stable_state_b ( total_mass ):
+	if total_mass <= 1: 
+		return 1
+	elif total_mass < (2*MaxMass + MaxCompress):
+		return (MaxMass*MaxMass + total_mass*MaxCompress)/(MaxMass + MaxCompress)
+	else:
+		return (total_mass + MaxCompress) * 0.5
+
 
 func increment_counter():
 	semaphore.post() # Make the thread process.

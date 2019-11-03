@@ -1,8 +1,6 @@
 extends RigidBody2D
 
-var turned_static = false
-
-# onready var static_tree = preload("res://Bullets/TreeStatic.tscn")
+onready var static_tree = preload("res://Bullets/TreeStatic.tscn")
 
 func _ready():
 	# create a unique collision shape for ourselves
@@ -11,9 +9,6 @@ func _ready():
 	$CollisionShape2D.shape = my_col_shape
 
 func _integrate_forces(state):
-	if turned_static:
-		return
-	
 	var my_vec = state.transform[0]
 	var target_vec = state.get_linear_velocity().normalized()
 	
@@ -43,37 +38,59 @@ func _integrate_forces(state):
 		$CollisionShape2D.shape.set_extents(old_scale * scale_speed)
 	
 	# Check for collisions
-	if not turned_static:
-		for i in range(state.get_contact_count()):
-			var contact_pos = state.get_contact_local_position(i)
+	for i in range(state.get_contact_count()):
+		var contact_pos = state.get_contact_local_position(i)
 
-			fix_tree( contact_pos, state.get_contact_collider_object(i) )
+		fix_tree( contact_pos, state.get_contact_collider_object(i) )
 
 func fix_tree(pos, body):
+	# if we're not hitting a staticbody or the tilemap
+	if not body is StaticBody2D and not body is TileMap:
+		return
+	
 	print("Hit something")
 	
-	# TO DO:
-	# Replace it with a STATIC body, with the same size
+	# Replace it with a STATIC body, with the same size/position/rotation
+	var static_body = static_tree.instance()
 	
-	# Quickly create a body to attach to
-	var temp_body = StaticBody2D.new()
+	static_body.set_position( pos )
+	static_body.set_rotation( get_rotation() )
 	
-	temp_body.set_position(pos)
-	get_node("/root/Node2D").add_child(temp_body)
+	# copy shape + sprite settings from rigid body
+	static_body.get_node("CollisionShape2D").shape = get_node("CollisionShape2D").shape
+	static_body.get_node("Sprite").set_scale( get_node("Sprite").get_scale() )
 	
-	# Create joint
-	var pin_joint = PinJoint2D.new()
+	# offset these so that the anchor is at the right position
+	var offset = (get_position() - pos).rotated(-get_rotation())
 	
-	pin_joint.set_position( pos )
+	static_body.get_node("CollisionShape2D").set_position( offset)
+	static_body.get_node("Sprite").set_position( offset)
 	
-	pin_joint.set_node_a(self.get_path())
-	pin_joint.set_node_b(temp_body.get_path())
-	pin_joint.disable_collision = true
-	pin_joint.bias = 0.2
+	static_body.set_meta("anchor_offset", offset / get_node("Sprite").get_scale() )
 	
-	get_node("/root/Node2D").add_child(pin_joint)
+	# add static body to the tree
+	get_node("/root/Node2D").call_deferred("add_child", static_body)
 	
-	turned_static = true
+	# finally, remove this tree
+	self.queue_free()
+
+	###
+	# OLD CODE
+	#  => Fixed trees by creating a joint
+	#  => Worked, but wasn't ideal
+	###
+	
+#	# Create joint
+#	var pin_joint = PinJoint2D.new()
+#
+#	pin_joint.set_position( pos )
+#
+#	pin_joint.set_node_a(self.get_path())
+#	pin_joint.set_node_b(temp_body.get_path())
+#	pin_joint.disable_collision = true
+#	pin_joint.bias = 0.2
+#
+#	get_node("/root/Node2D").add_child(pin_joint)
 
 func _on_Tree_body_entered(body):
 	pass

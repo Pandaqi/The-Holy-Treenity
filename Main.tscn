@@ -1,12 +1,14 @@
-[gd_scene load_steps=11 format=2]
+[gd_scene load_steps=13 format=2]
 
 [ext_resource path="res://Scripts/CellularAutomata.gd" type="Script" id=1]
 [ext_resource path="res://CellularAutomataThread.tscn" type="PackedScene" id=2]
 [ext_resource path="res://Tileset-Modified.tres" type="TileSet" id=3]
-[ext_resource path="res://Scripts/Player.gd" type="Script" id=4]
-[ext_resource path="res://icon.png" type="Texture" id=5]
+[ext_resource path="res://Scripts/Growth_Manager.gd" type="Script" id=4]
+[ext_resource path="res://Scripts/Player.gd" type="Script" id=5]
+[ext_resource path="res://icon.png" type="Texture" id=6]
+[ext_resource path="res://Scripts/DrawWater.gd" type="Script" id=7]
 
-[sub_resource type="Shader" id=5]
+[sub_resource type="Shader" id=1]
 code = "shader_type canvas_item;
 
 uniform sampler2D grid_tex;
@@ -26,19 +28,19 @@ void fragment() {
 	vec2 map_to_uv = vec2( (screen_to_map.x + 0.5) * pixel_size.x, (screen_to_map.y + 0.5) * pixel_size.y);
 	
 	// set color based on cellular automaton texture
-	COLOR = texture(grid_tex, map_to_uv);
+	COLOR = texture(grid_tex, map_to_uv).rgba;
 }"
 
-[sub_resource type="ShaderMaterial" id=6]
-shader = SubResource( 5 )
+[sub_resource type="ShaderMaterial" id=2]
+shader = SubResource( 1 )
 
-[sub_resource type="PhysicsMaterial" id=2]
+[sub_resource type="PhysicsMaterial" id=3]
 friction = 0.0
 
-[sub_resource type="CapsuleShape2D" id=3]
+[sub_resource type="CapsuleShape2D" id=4]
 radius = 20.0
 
-[sub_resource type="RectangleShape2D" id=4]
+[sub_resource type="RectangleShape2D" id=5]
 extents = Vector2( 15, 5 )
 
 [node name="Node2D" type="Node2D"]
@@ -51,7 +53,7 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 
 [node name="ColorRect" type="ColorRect" parent="CanvasLayer/Control"]
-material = SubResource( 6 )
+material = SubResource( 2 )
 anchor_right = 1.0
 anchor_bottom = 1.0
 script = ExtResource( 1 )
@@ -67,22 +69,26 @@ collision_mask = 3
 format = 1
 tile_data = PoolIntArray( 131081, 0, 0, 196617, 0, 0, 262153, 0, 0, 327689, 0, 0, 393225, 0, 0, 393229, 0, 0, 458753, 0, 0, 458761, 0, 0, 458765, 0, 0, 458766, 0, 0, 524290, 0, 0, 524291, 0, 0, 524297, 0, 0, 524302, 0, 0, 589828, 0, 0, 589829, 0, 0, 589830, 0, 0, 589831, 0, 0, 589832, 0, 0, 589833, 0, 0, 589837, 0, 0, 589838, 0, 0, 655373, 0, 0, 720908, 0, 0, 786432, 0, 0, 786443, 0, 0, 786444, 0, 0, 851969, 0, 0, 851978, 0, 0, 851979, 0, 0, 917505, 0, 0, 917514, 0, 0, 983042, 0, 0, 983049, 0, 0, 983050, 0, 0, 1048579, 0, 0, 1048580, 0, 0, 1048581, 0, 0, 1048582, 0, 0, 1048583, 0, 0, 1048584, 0, 0, 1048585, 0, 0 )
 
+[node name="Growth_Manager" type="Node2D" parent="."]
+script = ExtResource( 4 )
+
 [node name="Player" type="RigidBody2D" parent="." groups=[
-"OxygenTakers",
 "Players",
+"OxygenTakers",
+"WarmthGivers",
 ]]
 position = Vector2( 423.269, 210.526 )
 mode = 2
-physics_material_override = SubResource( 2 )
+physics_material_override = SubResource( 3 )
 gravity_scale = 10.0
-script = ExtResource( 4 )
+script = ExtResource( 5 )
 
 [node name="Sprite" type="Sprite" parent="Player"]
 scale = Vector2( 0.6, 1 )
-texture = ExtResource( 5 )
+texture = ExtResource( 6 )
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="Player"]
-shape = SubResource( 3 )
+shape = SubResource( 4 )
 
 [node name="Area2D" type="Area2D" parent="Player"]
 position = Vector2( 0, 35 )
@@ -90,4 +96,7 @@ collision_layer = 2
 collision_mask = 2
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="Player/Area2D"]
-shape = SubResource( 4 )
+shape = SubResource( 5 )
+
+[node name="DrawWater" type="Node2D" parent="."]
+script = ExtResource( 7 )
