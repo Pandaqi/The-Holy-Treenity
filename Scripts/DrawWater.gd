@@ -24,19 +24,6 @@ func _draw():
 			var col = Color(0, 0, 1, 0.5)
 			var height = min(val, 1.0) * 32
 			
-			# VISUAL TRICKERY:
-			# TO DO: This can be better ... 
-			# For example, Check surrounding tiles and shape the rectangle to fit.
-#			var ind_above = (y - 1) % int(MAP_SIZE.y)
-#			if grid[ind_above][x].size() > 0 and grid[ind_above][x][2] > 0:
-#				# if there's a cell with water above us, always fill us completely
-#				height = 32
-			
-			
-			
-			if val > 1.01:
-				print("Value above 1")
-			
 			# TO DO: Use pressure => if a cell has a value higher than 8.0, we push water upwards
 			
 			# LINKS ABOUT WATER/CELLULAR AUTOMATA
@@ -47,7 +34,7 @@ func _draw():
 			
 			# LAST LINK ABOUT Cellular Automata: https://gamedev.stackexchange.com/questions/59278/how-would-i-go-about-programming-atmosphere-for-a-game
 			
-			var rect = Rect2(Vector2(x * 64, (y+1) * 32 - height), Vector2(64, height))
+			var rect = Rect2(Vector2(x * 32, (y+1) * 32 - height), Vector2(32, height))
 			draw_rect(rect, col)
 
 func draw_water(grid, MAP_SIZE):

@@ -44,8 +44,8 @@ func _integrate_forces(state):
 		fix_tree( contact_pos, state.get_contact_collider_object(i) )
 
 func fix_tree(pos, body):
-	# if we're not hitting a staticbody or the tilemap
-	if not body is StaticBody2D and not body is TileMap:
+	# if we're not hitting the tilemap
+	if not body is TileMap:
 		return
 	
 	print("Hit something")

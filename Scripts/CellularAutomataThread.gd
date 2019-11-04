@@ -1,13 +1,18 @@
 extends Node
 
+# Variables for controlling the separate thread (on which the algorithm runs)
 var counter = 0
 var mutex
 var semaphore
 var thread
 var exit_thread = false
 
+# Variables for storing the grid and world map
 var grid = []
-export (Vector2) var MAP_SIZE = Vector2(32, 32)
+var MAP_SIZE
+
+# Variables for the algorithm itself (like how often it updates per second)
+var UPDATE_SPEED = 1.0
 
 # Water properties
 var MaxMass = 1.0 # The normal, un-pressurized mass of a full water cell
@@ -18,6 +23,8 @@ var MaxSpeed = 1.0 # ??
 
 # The thread will start here.
 func _ready():
+	
+	MAP_SIZE = Global.MAP_SIZE
 	
 	###
 	# Grid creation
@@ -93,9 +100,9 @@ func calculate_new_grid(impulses):
 	
 	# For each impulse, set pressure to 1.0
 	for imp in impulses:
-		var cell = imp[0]
-		var change = imp[1]
-		var gas_type = imp[2]
+		var cell = imp[0] # get the cell we should update
+		var change = imp[1] * UPDATE_SPEED # get the impulse, multiply it by the rate at which the automata is updated
+		var gas_type = imp[2] # get the gas type to update
 		
 		var cur_val = grid[cell.y][cell.x]
 		
@@ -132,10 +139,8 @@ func new_generation():
 						var neighbour = cur_cell + Vector2(a,b)
 						
 						# wrap values around the edges
-						if neighbour.x >= MAP_SIZE.x: neighbour.x -= MAP_SIZE.x
-						if neighbour.x < 0: neighbour.x += MAP_SIZE.x
-						if neighbour.y >= MAP_SIZE.y: neighbour.y -= MAP_SIZE.y
-						if neighbour.y < 0: neighbour.y += MAP_SIZE.y
+						neighbour.x = int(neighbour.x) % int(MAP_SIZE.x)
+						neighbour.y = int(neighbour.y) % int(MAP_SIZE.y)
 						
 						# get value that belongs to this neighbour
 						var neighbour_val = old_grid[neighbour.y][neighbour.x].duplicate()
@@ -148,7 +153,14 @@ func new_generation():
 						if gas == 0 or gas == 1:
 							# get the  difference between cells => use that to slowly equalize values
 							# NOTE: we must make sure that we remove/add the same value on both sides
-							cur_val[gas] += 0.1 * (neighbour_val[gas] - old_val[gas])
+							cur_val[gas] += 0.1 * (neighbour_val[gas] - old_val[gas]) * UPDATE_SPEED
+						
+						# HOWEVER, heat is released if there's not enough carbon, and increased when there's too much carbon
+						# This is an asymmetric operation: we only remove/add something from the system
+						if gas == 1:
+							var heat_floor = 0.25
+							var diff = (heat_floor - cur_val[0])
+							cur_val[1] += diff * 0.01 * UPDATE_SPEED
 				
 				# clamp the value between 0 and 1
 				cur_val[gas] = clamp(cur_val[gas], 0.0, 1.0)
@@ -164,19 +176,7 @@ func new_generation():
 	
 	var flow = 0
 	var remaining_mass = 0
-  
-	# Create empty array for new masses
-	var new_mass = []
-	new_mass.resize(MAP_SIZE.y)
-	for y in range(MAP_SIZE.y):
-		new_mass[y] = []
-		new_mass[y].resize(MAP_SIZE.x)
-		for x in range(MAP_SIZE.x):
-			if grid[y][x].size() == 0 or grid[y][x][2] < MinMass:
-				new_mass[y][x] = 0
-			else:
-				new_mass[y][x] = old_grid[y][x][2]
-
+	
 	# Calculate and apply flow for each block
 	for y in range(MAP_SIZE.y):
 		for x in range(MAP_SIZE.x):
@@ -210,8 +210,8 @@ func new_generation():
 				flow = clamp( flow, 0, min(MaxSpeed, remaining_mass) )
 	    
 				# update values
-				new_mass[y][x] -= flow
-				new_mass[ind_below][x] += flow   
+				grid[y][x][2] -= flow
+				grid[ind_below][x][2] += flow   
 				remaining_mass -= flow
 	    
 			if remaining_mass <= 0: continue
@@ -226,8 +226,8 @@ func new_generation():
 				if flow > MinFlow: flow *= 0.5
 				flow = clamp(flow, 0, remaining_mass)
 	       
-				new_mass[y][x] -= flow
-				new_mass[y][ind_left] += flow
+				grid[y][x][2] -= flow
+				grid[y][ind_left][2] += flow
 				remaining_mass -= flow
 	    
 			if remaining_mass <= 0: continue
@@ -242,8 +242,8 @@ func new_generation():
 				if flow > MinFlow: flow *= 0.5
 				flow = clamp(flow, 0, remaining_mass)
 	       
-				new_mass[y][x] -= flow
-				new_mass[y][ind_right] += flow
+				grid[y][x][2] -= flow
+				grid[y][ind_right][2] += flow
 				remaining_mass -= flow
 	    
 			if remaining_mass <= 0: continue
@@ -260,18 +260,9 @@ func new_generation():
 				flow = clamp( flow, 0, min(MaxSpeed, remaining_mass) )
 	    
 				# update values
-				new_mass[y][x] -= flow
-				new_mass[ind_above][x] += flow   
+				grid[y][x][2] -= flow
+				grid[ind_above][x][2] += flow   
 				remaining_mass -= flow
-	
-	# Copy the new mass values to the mass array
-	for y in range(MAP_SIZE.y):
-		for x in range(MAP_SIZE.x):
-			if grid[y][x].size() == 0:
-				continue
-			
-			grid[y][x][2] = new_mass[y][x]
-   
 
 func get_stable_state_b ( total_mass ):
 	if total_mass <= 1: 
