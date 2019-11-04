@@ -27,6 +27,7 @@ var THIRST = 1.0
 var OXYGEN_MINIMUM = 0.25
 var HEAT_MINUMUM = 0.25
 var HEAT_MAXIMUM = 0.75
+var THIRST_MINIMUM = 0.25
 
 
 func _ready():
@@ -96,7 +97,7 @@ func check_environment(delta, val):
 	# OXYGEN
 	###
 	# Transfer oxygen between us and the environment
-	var interpolation_factor = 0.5
+	var interpolation_factor = 0.2
 	OXYGEN = OXYGEN * interpolation_factor + val[0] * (1.0 - interpolation_factor)
 	
 	# if our current tile is almost completely filled with water
@@ -116,7 +117,7 @@ func check_environment(delta, val):
 	# HEAT
 	###
 	# Transfer heat between us and the environment
-	interpolation_factor = 0.5
+	interpolation_factor = 0.2
 	HEAT = HEAT * interpolation_factor + val[1] * (1.0 - interpolation_factor)
 	
 	# Check if our current heat should damage us
@@ -143,6 +144,12 @@ func check_environment(delta, val):
 		cur_thirst += cur_water * delta
 	
 	update_thirst(cur_thirst)
+	
+	if THIRST < THIRST_MINIMUM:
+		damage += 0.01 * delta
+		play_meter_anim("ThirstLevels", true)
+	else:
+		play_meter_anim("ThirstLevels", false)
 	
 	###
 	# HP
@@ -267,12 +274,12 @@ func shoot(dir, bullet_type):
 		
 		# position it just outside of our player rectangle
 		var tree_size = new_bullet.get_node("CollisionShape2D").shape.height * 2
-		var player_size = 30
+		var player_size = 15
 		
 		new_bullet.set_position( get_position() + dir * (tree_size + player_size))
 		
-		# add impulse to tree
-		new_bullet.apply_central_impulse(dir * 500)
+		# add impulse to sapling
+		new_bullet.apply_central_impulse(dir * 200)
 	
 	
 	###
@@ -299,4 +306,4 @@ func shoot(dir, bullet_type):
 		new_bullet.apply_central_impulse(dir * 500)
 	
 	# finally, add tree to the world
-	get_node("/root/Node2D").call_deferred("add_child", new_bullet)
+	get_node("/root/Node2D/TreesLayer").call_deferred("add_child", new_bullet)

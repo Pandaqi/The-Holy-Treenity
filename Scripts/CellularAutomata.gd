@@ -5,6 +5,10 @@ var last_known_grid = null
 
 onready var tilemap = get_node("/root/Node2D/TileMap")
 
+onready var freezed_block = preload("res://Effects/FreezedBlock.tscn")
+
+var FIRE_THRESHOLD = 0.6
+
 func _ready():
 	# Initialize timer
 	generation_timer = Timer.new()
@@ -36,17 +40,61 @@ func new_generation():
 	###
 	var impulses = []
 	for obj in get_tree().get_nodes_in_group("OxygenGivers"):
+		# If this object is about to be removed (like a tree that died from fire), ignore this!
+		if not is_instance_valid(obj):
+			continue
 		
-		var transformed_position = obj.get_position() + obj.get_transform().x * obj.get_node("Sprite").get_scale().x * 32
-		
+		var transformed_position = obj.get_transformed_position()
 		var true_position = get_safe_position( transformed_position )
 		
-		impulses.append( [true_position, 0.4, 0] )
+		var cell = last_known_grid[true_position.y][true_position.x]
+		
+		# If this object is already on fire ...
+		if obj.is_on_fire():
+			# Expel carbon and heat
+			impulses.append( [true_position, -0.2, 0] )
+			impulses.append( [true_position, 0.2, 1] )
+			
+			# Check if the fire should stop
+			#  => The heat has decreased enough, or there's loads of water here
+			if cell.size() > 0:
+				if cell[1] < FIRE_THRESHOLD*0.2 or cell[2] >= 0.6:
+					obj.extinguish_fire()
+			
+			# Damage the tree
+			obj.damage(-0.01)
+	
+		# If this object is NOT on fire ...
+		else:
+			if cell.size() > 0:
+				# Check if it's too hot, and there's no water to cool us
+				if cell[1] >= FIRE_THRESHOLD and cell[2] <= 0.2:
+					# If so, start a fire!
+					obj.start_fire()
+					
+					# increase oxygen (as this is an oxygen giver)
+					impulses.append( [true_position, 0.2, 0] )
 	
 	for obj in get_tree().get_nodes_in_group("OxygenTakers"):
 		var true_position = get_safe_position( obj.get_position() )
+		var cell = last_known_grid[true_position.y][true_position.x]
 		
 		impulses.append( [true_position, -0.3, 0] )
+		
+		# if an oxygen taker is under water, it should have a particle effect with bells popping up!
+		var bell_part =  obj.get_node("BellParticles")
+		
+		if bell_part.is_emitting():
+			# if we're already emitting, check if we should continue or not
+			if cell.size() == 0 or cell[2] < 0.75:
+				bell_part.restart()
+				bell_part.set_emitting(false)
+				bell_part.set_visible(false)
+				
+		else:
+			if cell.size() > 0 and cell[2] >= 0.75:
+				bell_part.set_emitting(true)
+				bell_part.set_visible(true)
 	
 	###
 	# Giving/taking heat
@@ -55,7 +103,6 @@ func new_generation():
 		var true_position = get_safe_position( obj.get_position() )
 		
 		impulses.append( [true_position, 0.2, 1] )
-		impulses.append( [true_position, 0.2, 2] )
 	
 	get_node("Semaphore").calculate_new_grid(impulses)
 
@@ -66,23 +113,7 @@ func get_safe_position(pos):
 	
 	return temp
 
-func check_water_level(pos):
-	var water_found = false
-	var counter = 0
-	
-	# this just keeps checking tiles above us until we find the first non-impenetrable cell
-	# (not necessarily the first tile with water)
-	while not water_found:
-		var temp_pos = get_safe_position(pos - counter*Vector2(0,32))
-		var cur_val = last_known_grid[temp_pos.y][temp_pos.x]
-		
-		if cur_val.size() > 0:
-			return cur_val[2]
-			water_found = true
-		
-		counter += 1
-
-func update_texture(grid, MAP_SIZE):
+func update_texture(grid, MAP_SIZE, raining, freezed_blocks):
 
 	# Display the grid inside a texture
 	# Create an Image
@@ -124,9 +155,29 @@ func update_texture(grid, MAP_SIZE):
 	# WATER
 	###
 	
-	# Also ask the water node to draw the water
-	get_node("/root/Node2D/DrawWater").draw_water(grid, MAP_SIZE)
+	# Start/stop the rain particle
+	get_node("/root/Node2D/Rain_Particles").set_emitting(raining)
 	
+	# Also ask the water node to draw the water
+	get_node("/root/Node2D/WeatherLayer/DrawWater").draw_water(grid, MAP_SIZE)
+	
+	# Go through all currently freezed blocks, and check if they should be unfreezed
+	for block in get_tree().get_nodes_in_group("FreezedBlocks"):
+		var my_val = tilemap.world_to_map( block.get_position() )
+		if grid[my_val.y][my_val.x][2] != null:
+#			print("Unfreezed block ", my_val)
+#
+			block.queue_free()
+	
+	# Add any blocks that should be freezed
+	for block in freezed_blocks:
+#		print("Freezed block", block)
+#
+		var new_block = freezed_block.instance()
+		new_block.set_position( tilemap.map_to_world(block) )
+		get_node("/root/Node2D").add_child(new_block)
+	
+	# OLD METHOD (without shader, using Sprite node)
 	# Add texture to the sprite
 #	var sprite = get_node("Sprite")
 #	sprite.set_texture(image_tex)

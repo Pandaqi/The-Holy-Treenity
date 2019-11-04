@@ -21,6 +21,16 @@ var MinMass = 0.0001  # Ignore cells that are almost dry
 var MinFlow = 0.01 # ?? Every time we flow water, flow at least this value
 var MaxSpeed = 1.0 # ??
 
+var WaterFreezingPoint = 0.3 # heat value below which water is frozen
+
+var water_in_sky = 10.0 # start with a LOT of water
+var water_evaporated = 0.0
+var raining = false
+
+var freezed_blocks = []
+
+var average_temp = 0.0
+
 # The thread will start here.
 func _ready():
 	
@@ -71,15 +81,9 @@ func _ready():
 func _thread_function(userdata):
 	while true:
 		semaphore.wait() # Wait until posted.
-		
-		# Perform grid calculations
-		new_generation()
-		
-		# Return grid
-		get_parent().update_texture(grid, MAP_SIZE)
 	
 		###
-		# Thread stuff (... is the counter really necessary? What's it for?)
+		# Thread stuff
 		###
 		
 		mutex.lock()
@@ -88,13 +92,48 @@ func _thread_function(userdata):
 	
 		if should_exit:
 			break
+		
+		###
+		# Grid calculation stuff
+		###
+		
+		mutex.lock()
+		
+		# Perform grid calculations
+		new_generation()
+		
+		mutex.unlock()
+		
+		mutex.lock()
+		manage_rain()
+		mutex.unlock()
+
+		# Return grid
+		mutex.lock()
+		get_parent().update_texture(grid, MAP_SIZE, raining, freezed_blocks)
+		
+		mutex.unlock()
 	
+		###
+		# Counter (this is really just for debugging, and for learning how threads worked in the first place)
+		###
 		mutex.lock()
 		counter += 1 # Increment counter, protect with Mutex.
 		mutex.unlock()
 
+func manage_rain():
+	# Check if it should start raining
+	water_in_sky += water_evaporated
+	var rain_threshold = 10.0 * average_temp
+
+	if not raining and water_in_sky > rain_threshold:
+		raining = true
+	elif raining and water_in_sky < 0.0:
+		water_in_sky = 0.0
+		raining = false
+
 func calculate_new_grid(impulses):
-	# TO DO: Do something with changes given to us
+	# Do something with changes given to us
 	
 	var gas_bounds = [Vector2(0.0, 1.0), Vector2(0.0, 1.0), Vector2(0, 8)]
 	
@@ -115,6 +154,10 @@ func new_generation():
 	# create copy of the previous generation
 	var old_grid = grid.duplicate(true)
 	
+	# initialize average temperature
+	average_temp = 0.0
+	var num_available_blocks = 0
+	
 	# create new generation for cellular automata
 	# loop through all cells ...
 	for y in range(MAP_SIZE.y):
@@ -127,9 +170,38 @@ func new_generation():
 			# if we're impenetrable, don't consider us
 			if cur_val.size() == 0:
 				continue
+				
+			# remember this is a block that was available
+			# (it wasn't static/impenetrable)
+			num_available_blocks += 1
+			
+			# also add temperature to overall value
+			average_temp += cur_val[1]
+			
+			# NOTE: It's VERY important that this goes before the rain code,
+			#		otherwise frozen blocks also get rain and they aren't exactly -1 anymore
+			# if we're FROZEN ...
+			if cur_val[2] == null:
+				# try to unfreeze
+				# check if the heat is above the desired level
+				if cur_val[1] > WaterFreezingPoint * 1.0:
+					# if so, reset to a full water block
+					grid[y][x][2] = 1.0
+			else:
+				# if it's raining, 
+				# add impulse to all tiles with a solid block below, as long as they aren't frozen
+				# (it's better to do this inside this loop, instead of when we're already in the water loop)
+				var ind_below = (y + 1) % int(MAP_SIZE.y)
+				if raining:
+					if old_grid[ind_below][x].size() == 0 or old_grid[ind_below][x][2] == null:
+						var water_drop_mass = 0.005
+						
+						grid[y][x][2] += water_drop_mass
+						water_in_sky -= water_drop_mass
 			
 			for gas in range(2):
-				# OXYGEN and HEAT have pretty default code
+				# OXYGEN and HEAT have pretty default code:
+				# Equally exchange/flow gases between yourself and neighbours
 				for a in range(-1,2):
 					for b in range(-1,2):
 						if a == 0 and b == 0:
@@ -158,7 +230,7 @@ func new_generation():
 						# HOWEVER, heat is released if there's not enough carbon, and increased when there's too much carbon
 						# This is an asymmetric operation: we only remove/add something from the system
 						if gas == 1:
-							var heat_floor = 0.25
+							var heat_floor = 0.35
 							var diff = (heat_floor - cur_val[0])
 							cur_val[1] += diff * 0.01 * UPDATE_SPEED
 				
@@ -166,7 +238,10 @@ func new_generation():
 				cur_val[gas] = clamp(cur_val[gas], 0.0, 1.0)
 				
 			# finally add the new value into the NEW grid
-			grid[y][x] = cur_val
+			grid[y][x][0] = cur_val[0]
+			grid[y][x][1] = cur_val[1]
+	
+	average_temp = average_temp / num_available_blocks
 	
 	###
 	#
@@ -176,6 +251,9 @@ func new_generation():
 	
 	var flow = 0
 	var remaining_mass = 0
+	water_evaporated = 0.0
+	
+	freezed_blocks.clear()
 	
 	# Calculate and apply flow for each block
 	for y in range(MAP_SIZE.y):
@@ -187,6 +265,14 @@ func new_generation():
 			# set flow and mass variables
 			flow = 0
 			remaining_mass = old_grid[y][x][2]
+			
+			if remaining_mass == null: continue
+			
+			if remaining_mass < 0:
+				print("Mass < 0??? ", x, " || ", y)
+	
+			if remaining_mass == null:
+				print("Mass is null??? ", x, " || ", y)
 	
 			# if we don't have water, continue!
 			if remaining_mass <= 0: continue
@@ -200,7 +286,7 @@ func new_generation():
 			###
 			# Check block below
 			###
-			if grid[ind_below][x].size() > 0:
+			if grid[ind_below][x].size() > 0 and grid[ind_below][x][2] != null:
 				flow = get_stable_state_b( remaining_mass + old_grid[ind_below][x][2] ) - old_grid[ind_below][x][2]
 	     
 				# ... doing this leads to a smoother flow
@@ -219,7 +305,7 @@ func new_generation():
 			###
 			# Check block to the left
 			###
-			if grid[y][ind_left].size() > 0:
+			if grid[y][ind_left].size() > 0 and grid[y][ind_left][2] != null:
 				# equalize the amount of water in this block and it's neighbour
 				flow = (old_grid[y][x][2] - old_grid[y][ind_left][2]) * 0.25
 	    
@@ -235,7 +321,7 @@ func new_generation():
 			###
 			# Check block to the right
 			###
-			if grid[y][ind_right].size() > 0:
+			if grid[y][ind_right].size() > 0 and grid[y][ind_right][2] != null:
 				# equalize the amount of water in this block and it's neighbour
 				flow = (old_grid[y][x][2] - old_grid[y][ind_right][2]) * 0.25
 	    
@@ -253,16 +339,46 @@ func new_generation():
 			#
 			#   => Only compressed water flows upwards.
 			###
-			if grid[ind_above][x].size() > 0:
+			if grid[ind_above][x].size() > 0 and grid[ind_above][x][2] != null:
 				flow = remaining_mass - get_stable_state_b( remaining_mass + old_grid[ind_above][x][2] )
 	    
 				if flow > MinFlow: flow *= 0.5
 				flow = clamp( flow, 0, min(MaxSpeed, remaining_mass) )
-	    
+		
 				# update values
 				grid[y][x][2] -= flow
 				grid[ind_above][x][2] += flow   
 				remaining_mass -= flow
+			
+			if remaining_mass <= 0: continue
+			
+			# If there's any water left, and it's not raining, check if it should ...
+			#  => EVAPORATE (if heat is high enough)
+			#  => or FREEZE (if heat below freezing point)
+			# Get heat at this location
+			var heat = old_grid[y][x][1]
+			
+			if not raining:
+				# Evaporate proportional to the heat
+				var water_to_evaporate = remaining_mass * heat * 0.02
+			
+				# Update current tile, global evaporation number, and remaining_mass
+				grid[y][x][2] -= water_to_evaporate
+				water_evaporated += water_to_evaporate
+				remaining_mass -= water_to_evaporate
+			
+			# NOTE: We don't freeze small amounts of water, just looks ugly and complicates the algorithms
+			if remaining_mass <= 0.5: continue
+
+			# If we're below freezing point ...
+			if heat < WaterFreezingPoint:
+				# If we're on top of a static block (impenetrable or frozen)
+				if grid[ind_below][x].size() == 0 or grid[ind_below][x][2] == null:
+					# Set our (water) value to -1
+					grid[y][x][2] = null
+
+					# Remember we freezed this block
+					freezed_blocks.append(Vector2(x,y))
 
 func get_stable_state_b ( total_mass ):
 	if total_mass <= 1: 

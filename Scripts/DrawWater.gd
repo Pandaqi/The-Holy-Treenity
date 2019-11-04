@@ -15,6 +15,9 @@ func _draw():
 			var val = grid[y][x][2]
 			
 			# floating point precision errors => better give ourselves some margin
+			if val == null: 
+				continue
+			
 			if val <= 0:
 				continue
 			
@@ -23,7 +26,7 @@ func _draw():
 			# (anchor it to the bottom, that's why we do (y+1)*32 - height)
 			var col = Color(0, 0, 1, 0.5)
 			var height = min(val, 1.0) * 32
-			
+
 			# TO DO: Use pressure => if a cell has a value higher than 8.0, we push water upwards
 			
 			# LINKS ABOUT WATER/CELLULAR AUTOMATA
