@@ -286,7 +286,7 @@ func new_generation():
 			###
 			# Check block below
 			###
-			if grid[ind_below][x].size() > 0 and grid[ind_below][x][2] != null:
+			if old_grid[ind_below][x].size() > 0 and old_grid[ind_below][x][2] != null:
 				flow = get_stable_state_b( remaining_mass + old_grid[ind_below][x][2] ) - old_grid[ind_below][x][2]
 	     
 				# ... doing this leads to a smoother flow
@@ -304,8 +304,11 @@ func new_generation():
 	  
 			###
 			# Check block to the left
+			# NOTE: Because we traverse the array TOP->BOTTOM, LEFT-> RIGHT
+			#       it's possible that the left cell has been frozen in the mean time
+			#       that's why we do an extra check on the new grid
 			###
-			if grid[y][ind_left].size() > 0 and grid[y][ind_left][2] != null:
+			if old_grid[y][ind_left].size() > 0 and old_grid[y][ind_left][2] != null and grid[y][ind_left][2] != null:
 				# equalize the amount of water in this block and it's neighbour
 				flow = (old_grid[y][x][2] - old_grid[y][ind_left][2]) * 0.25
 	    
@@ -321,7 +324,7 @@ func new_generation():
 			###
 			# Check block to the right
 			###
-			if grid[y][ind_right].size() > 0 and grid[y][ind_right][2] != null:
+			if old_grid[y][ind_right].size() > 0 and old_grid[y][ind_right][2] != null:
 				# equalize the amount of water in this block and it's neighbour
 				flow = (old_grid[y][x][2] - old_grid[y][ind_right][2]) * 0.25
 	    
@@ -339,7 +342,7 @@ func new_generation():
 			#
 			#   => Only compressed water flows upwards.
 			###
-			if grid[ind_above][x].size() > 0 and grid[ind_above][x][2] != null:
+			if old_grid[ind_above][x].size() > 0 and old_grid[ind_above][x][2] != null:
 				flow = remaining_mass - get_stable_state_b( remaining_mass + old_grid[ind_above][x][2] )
 	    
 				if flow > MinFlow: flow *= 0.5
@@ -373,8 +376,8 @@ func new_generation():
 			# If we're below freezing point ...
 			if heat < WaterFreezingPoint:
 				# If we're on top of a static block (impenetrable or frozen)
-				if grid[ind_below][x].size() == 0 or grid[ind_below][x][2] == null:
-					# Set our (water) value to -1
+				if old_grid[ind_below][x].size() == 0 or old_grid[ind_below][x][2] == null:
+					# Set our (water) value to null
 					grid[y][x][2] = null
 
 					# Remember we freezed this block

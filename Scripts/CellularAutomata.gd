@@ -1,13 +1,15 @@
 extends Node
 
 var generation_timer
-var last_known_grid = null
+var last_known_grid
 
 onready var tilemap = get_node("/root/Node2D/TileMap")
 
 onready var freezed_block = preload("res://Effects/FreezedBlock.tscn")
 
 var FIRE_THRESHOLD = 0.6
+
+var saved_impulses = []
 
 func _ready():
 	# Initialize timer
@@ -33,12 +35,30 @@ func window_resize():
 	self.material.set_shader_param("screen_size", get_viewport().size)
 
 func new_generation():
+	# if we don't have a grid (yet), do nothing
+	if last_known_grid == null or last_known_grid.size() == 0:
+		return
+	
 	# this is where we add new impulses to the system => trees give oxygen, players take it, etc.
+	var impulses = []
+	
+	###
+	# First go through the "saved impulses"
+	#  => Impulses generated in between updates to the grid
+	## 
+	for imp in saved_impulses:
+		# convert position to one that is safe for the system
+		# NOTE: imp[0] is the ACTUAL coordinates of the object, not the cell coordinates
+		imp[0] = get_safe_position( imp[0] )
+		
+		impulses.append(imp)
+	
+	saved_impulses.clear()
 	
 	###
 	# Giving/taking oxygen and carbon
 	###
-	var impulses = []
+	
 	for obj in get_tree().get_nodes_in_group("OxygenGivers"):
 		# If this object is about to be removed (like a tree that died from fire), ignore this!
 		if not is_instance_valid(obj):
@@ -81,20 +101,31 @@ func new_generation():
 		
 		impulses.append( [true_position, -0.3, 0] )
 		
+		# if it's ice, continue!
+		if cell.size() > 0 and cell[2] == null:
+			continue
+		
+		# if we're holding the water gun ...
+		if obj.CUR_WEAPON == 1:
+			# grab some water for the gun
+			if cell.size() > 0 and cell[2] != null:
+				var val_exchanged = min(cell[2], 0.2)
+				
+				# update player variable, and update grid of course
+				obj.update_water_gun( val_exchanged )
+				impulses.append( [true_position, -val_exchanged, 2] )
+		
 		# if an oxygen taker is under water, it should have a particle effect with bells popping up!
 		var bell_part =  obj.get_node("BellParticles")
 		
 		if bell_part.is_emitting():
 			# if we're already emitting, check if we should continue or not
 			if cell.size() == 0 or cell[2] < 0.75:
-				bell_part.restart()
 				bell_part.set_emitting(false)
-				bell_part.set_visible(false)
-				
 		else:
 			if cell.size() > 0 and cell[2] >= 0.75:
+				bell_part.restart()
 				bell_part.set_emitting(true)
-				bell_part.set_visible(true)
 	
 	###
 	# Giving/taking heat
@@ -135,7 +166,7 @@ func update_texture(grid, MAP_SIZE, raining, freezed_blocks):
 				# change ALPHA based on oxygen level
 				# Thicker = more carbon, less oxygen
 				# ??? Perhaps we need a background to show this properly, and perhaps only change alpha at extremes
-				new_color.a = (1.0 - val[0])
+				# new_color.a = (1.0 - val[0])
 			
 			texture.set_pixel(x, y, new_color)
 	

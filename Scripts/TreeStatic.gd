@@ -4,6 +4,8 @@ var on_fire = false
 var fire_scene = preload("res://Effects/Fire.tscn")
 var fire_effect = null
 
+var sapling_scene = preload("res://Bullets/SaplingStatic.tscn")
+
 var HEALTH = 1.0
 
 var sapling_timer
@@ -20,7 +22,15 @@ func _ready():
 	sapling_timer.start()
 
 func drop_sapling():
-	# TO DO: Drop actual sapling (which you can pick up with the player)
+	# drop actual sapling (which you can pick up with the player)
+	var new_sapling = sapling_scene.instance()
+	
+	# place sapling at center position, slight displaced
+	new_sapling.transform.origin = get_transformed_position() + Vector2(rand_range(0.2, -0.2), rand_range(0.2, -0.2))
+	
+	# add sapling to the world
+	get_node("/root/Node2D").call_deferred("add_child", new_sapling)
+	
 	print("Tree should drop a sapling")
 	
 	# set new wait time

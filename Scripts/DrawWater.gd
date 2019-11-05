@@ -13,19 +13,29 @@ func _draw():
 				continue
 			
 			var val = grid[y][x][2]
+			var ice_block = false
+			
+			# if it's an ice block, set value to 1
+			if val == null: 
+				val = 1
+				ice_block = true
 			
 			# floating point precision errors => better give ourselves some margin
-			if val == null: 
-				continue
-			
-			if val <= 0:
+			elif val <= 0:
 				continue
 			
 			# Draw rectangle
 			# At right position, with blue color, and right height 
 			# (anchor it to the bottom, that's why we do (y+1)*32 - height)
+			
+			# Normal tile => transparent, blue-ish color + dynamic height
 			var col = Color(0, 0, 1, 0.5)
 			var height = min(val, 1.0) * 32
+			
+			# Ice tile => opaque white color, fixed full height
+			if ice_block:
+				col = Color(1.0, 1.0, 1.0, 1.0)
+				height = 32
 
 			# TO DO: Use pressure => if a cell has a value higher than 8.0, we push water upwards
 			
