@@ -9,7 +9,7 @@ var sapling_scene = preload("res://Bullets/SaplingStatic.tscn")
 var HEALTH = 1.0
 
 var sapling_timer
-var time_between_saplings = Vector2(5.0, 20.0)
+var time_between_saplings = Vector2(10.0, 40.0)
 
 func _ready():
 	# Initialize timer

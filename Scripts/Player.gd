@@ -34,7 +34,9 @@ var HEAT_MAXIMUM = 0.75
 var THIRST_MINIMUM = 0.25
 
 # Player variables for its GUNS/BULLETS
-var CUR_WEAPON = 1
+var CUR_WEAPON = -1
+var cur_weapon_obj = null
+
 var SAPLINGS = 0
 var AVAILABLE_WATER = 0.0
 
@@ -42,6 +44,7 @@ var last_shot = 0.0
 
 
 var bodies_to_attract = []
+var guns_in_range = []
 
 var interface_positions = [Vector2(0,0), Vector2(1024,0), Vector2(0, 768), Vector2(1024,768)]
 
@@ -97,8 +100,33 @@ func _physics_process(delta):
 			# increment variable that keeps track of the number of saplings we have
 			update_saplings(1)
 			
+			# play the sound effect
+			play_sound("pickup")
+			
 			# delete this sapling from the world
 			body.queue_free()
+	
+	# if we're not going at a high speed ... (we're staying relatively still)
+	if abs(get_linear_velocity().x) < MAX_SPEED * 0.5:
+		# switch guns if needed 
+		for gun in guns_in_range:
+			# if this gun is disabled (for whatever reason, but probably in use by another player)
+			if gun.is_disabled():
+				continue
+			
+			# otherwise, check distance to gun
+			# if below the gun collision radius (30px), consider it within range
+			var dist_to_gun = (transform.origin - gun.transform.origin).length()
+			if dist_to_gun < 30:
+				# increase the gun timer
+				gun.increase_timer(delta)
+				
+				# if we've waited long enough, equip the gun!
+				if gun.times_up():
+					# equip the gun!
+					equip_weapon(gun)
+			else:
+				gun.reset_timer()
 	
 	# poll the value of the cellular automata at this position
 	var last_grid = get_node("/root/Node2D/CellularAutomata/Control/ColorRect").last_known_grid
@@ -115,6 +143,32 @@ func _physics_process(delta):
 		
 		# using these values from the environment, update our statistics (oxygen, heat, water, etc.)
 		check_environment(delta, val)
+
+func equip_weapon(gun):
+	# If we HAVE a current weapon ...
+	if cur_weapon_obj != null:
+		# ... throw it out (at the right position)
+		cur_weapon_obj.enable( transform.origin )
+	
+	play_sound("powerup")
+	
+	if gun != null:
+		# set variables to right object and type
+		CUR_WEAPON = gun.my_type
+		cur_weapon_obj = gun
+		
+		# Display icon over our head
+		get_node("WeaponIcon").frame = CUR_WEAPON
+		get_node("WeaponIcon").set_visible(true)
+		
+		# Disable the gun object (visibility and collision shape)
+		gun.disable()
+	else:
+		CUR_WEAPON = -1
+		cur_weapon_obj = null
+		
+		get_node("WeaponIcon").set_visible(false)
+
 
 func check_environment(delta, val):
 	if val.size() == 0:
@@ -309,6 +363,8 @@ func _integrate_forces(state):
 	if bodies_below_us.size() > 0:
 		# ... allow jumping
 		if Input.is_action_just_released( get_action("jump") ):
+			play_sound("jump")
+			
 			VELOCITY += Vector2(0, -JUMP_SPEED)
 	
 		for body in bodies_below_us:
@@ -341,6 +397,10 @@ func level_wrap(state):
 	
 
 func shoot(dir):
+	# If we don't have a weapon, we can't shoot!
+	if CUR_WEAPON < 0:
+		return
+	
 	# if we're not aiming, use the last direction we walked into
 	if dir == Vector2.ZERO:
 		dir = last_known_movement
@@ -425,11 +485,23 @@ func shoot(dir):
 	
 	# finally, add this particular bullet to the world
 	get_node("/root/Node2D/TreesLayer").call_deferred("add_child", new_bullet)
+	
+	# play sound effect
+	play_sound("shoot")
+
+func play_sound(file_name):
+	$AudioPlayer.stream = load("res://Sound/" + str(file_name) + ".wav")
+	$AudioPlayer.pitch_scale = rand_range(0.8, 1.2)
+	$AudioPlayer.play()
 
 func _on_AttractArea_body_entered(body):
 	if body.is_in_group("Saplings"):
 		bodies_to_attract.append(body)
+	elif body.is_in_group("Guns"):
+		guns_in_range.append(body)
 
 func _on_AttractArea_body_exited(body):
 	if body.is_in_group("Saplings"):
 		bodies_to_attract.erase(body)
+	elif body.is_in_group("Guns"):
+		guns_in_range.erase(body)

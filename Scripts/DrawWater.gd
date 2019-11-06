@@ -29,13 +29,20 @@ func _draw():
 			# (anchor it to the bottom, that's why we do (y+1)*32 - height)
 			
 			# Normal tile => transparent, blue-ish color + dynamic height
-			var col = Color(0, 0, 1, 0.5)
+			var col = Color(0.6, 0.6, 1, 0.5)
 			var height = min(val, 1.0) * 32
 			
 			# Ice tile => opaque white color, fixed full height
 			if ice_block:
 				col = Color(1.0, 1.0, 1.0, 1.0)
 				height = 32
+			
+			# Check if block above has water, if so, always set to full water
+			var val_above = grid[ int(y - 1) % int(MAP_SIZE.y) ][x]
+			
+			if val_above.size() > 0 and val_above[2] != null:
+				if val_above[2] > 0:
+					height = 32
 
 			# TO DO: Use pressure => if a cell has a value higher than 8.0, we push water upwards
 			

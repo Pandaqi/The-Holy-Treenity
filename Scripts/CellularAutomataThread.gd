@@ -145,7 +145,7 @@ func calculate_new_grid(impulses):
 		
 		var cur_val = grid[cell.y][cell.x]
 		
-		if cur_val.size() > 0:
+		if cur_val.size() > 0 and (gas_type != 2 or cur_val[2] != null):
 			grid[cell.y][cell.x][gas_type] = clamp(cur_val[gas_type] + change, gas_bounds[gas_type].x, gas_bounds[gas_type].y)
 	
 	semaphore.post() # tell thread to update
