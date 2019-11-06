@@ -8,15 +8,16 @@ var player_num = -1
 # Player variables for movement
 var VELOCITY = Vector2.ZERO
 var MOVE_SPEED = 100
-var JUMP_SPEED = 400
-var MAX_SPEED = 200
+var JUMP_SPEED = 500
+var MAX_SPEED = 250
 
 var last_known_movement = Vector2.ZERO
 
 # Bullet scenes
-onready var tree_bullet = preload("res://Bullets/Tree.tscn")
+onready var log_bullet = preload("res://Bullets/Log.tscn")
 onready var sapling_bullet = preload("res://Bullets/Sapling.tscn")
 onready var water_bullet = preload("res://Bullets/Water.tscn")
+onready var fire_bolt = preload("res://Bullets/FireBolt.tscn")
 
 # Scenes we will need often
 onready var tilemap = get_node("/root/Node2D/TileMap")
@@ -33,6 +34,8 @@ var HEAT_MINUMUM = 0.25
 var HEAT_MAXIMUM = 0.75
 var THIRST_MINIMUM = 0.25
 
+var cur_water = 0.0
+
 # Player variables for its GUNS/BULLETS
 var CUR_WEAPON = -1
 var cur_weapon_obj = null
@@ -47,11 +50,12 @@ var bodies_to_attract = []
 var guns_in_range = []
 
 var interface_positions = [Vector2(0,0), Vector2(1024,0), Vector2(0, 768), Vector2(1024,768)]
+var interface_flips = [Vector2(1,1), Vector2(-1, 1), Vector2(1, -1), Vector2(-1, -1)]
+
+var dead = false
 
 
 func _ready():
-	set_controller(0, -1)
-	
 	# trick to automatically set our default saplings
 	update_saplings(10)
 
@@ -67,6 +71,14 @@ func _ready():
 	
 	# update position of our interface
 	my_interface.set_position( interface_positions[player_num] )
+	
+	# flip it, so everything is still displayed correcetly
+	var my_flips = interface_flips[player_num]
+	var cur_scale = my_interface.get_scale()
+	my_interface.set_scale( Vector2(cur_scale.x * my_flips.x, cur_scale.y * my_flips.y) )
+	
+	# but flip the counter back, so it's still readable
+	my_interface.get_node("SaplingCounter").set_scale( my_flips )
 
 func set_controller(player_num, device_num):
 	self.control_num = device_num
@@ -74,7 +86,7 @@ func set_controller(player_num, device_num):
 	
 	var actions = ["right", "left", "up", "down", "jump", "shoot"]
 	for action in actions:
-		 control_table[action] = action + str(control_num)
+		 control_table[action] = action + str(device_num)
 	
 #	# Get player color from Global script
 #	var my_col = Global.player_colors[player_num]
@@ -84,6 +96,8 @@ func set_controller(player_num, device_num):
 #	player_label.set_frame( player_num )
 
 func _physics_process(delta):
+	if dead:
+		return
 	
 	# attract any bodies we want to attract
 	for body in bodies_to_attract:
@@ -150,7 +164,11 @@ func equip_weapon(gun):
 		# ... throw it out (at the right position)
 		cur_weapon_obj.enable( transform.origin )
 	
+	# Always play powerup sound
 	play_sound("powerup")
+	
+	# And always reset last_shot
+	last_shot = 0.0
 	
 	if gun != null:
 		# set variables to right object and type
@@ -196,7 +214,7 @@ func check_environment(delta, val):
 	
 	# if our current tile is almost completely filled with water
 	# we're considered to be "drowning"
-	var cur_water = val[2]
+	cur_water = val[2]
 	if cur_water == null: cur_water = 0.0
 	if cur_water >= 0.8:
 		OXYGEN = 0.0
@@ -236,7 +254,7 @@ func check_environment(delta, val):
 	
 	# But if we're standing in water, we automatically drink it, to balance it out
 	if cur_water > 0:
-		cur_thirst += cur_water * delta
+		cur_thirst += (cur_water + 0.1) * delta
 	
 	update_thirst(cur_thirst)
 	
@@ -270,7 +288,7 @@ func update_water_gun(dw):
 func update_saplings(ds):
 	SAPLINGS += ds
 	
-	my_interface.get_node("SaplingCounter").set_text( str(SAPLINGS) )
+	my_interface.get_node("SaplingCounter/SaplingCounterLabel").set_text( str(SAPLINGS) )
 
 func update_thirst(dt):
 	THIRST += dt
@@ -281,6 +299,19 @@ func update_health(dh):
 	HEALTH += dh
 	
 	resize_meter("HP", HEALTH)
+	
+	# if we have no health left, die!
+	if HEALTH <= 0:
+		# set this player to inactive
+		dead = true
+		
+		# inform the game that a player died
+		get_node("/root/Node2D").player_died()
+		
+		# TO DO: play an animation/particle effect to show we died
+		
+		# TO DO: remove player from the world
+		# self.queue_free()
 
 func play_meter_anim(node_name, out_of_bounds):
 	var cur_node = my_interface.get_node(node_name)
@@ -306,6 +337,9 @@ func get_action(action):
 
 
 func _integrate_forces(state):
+	if dead:
+		return
+	
 	# Get input (full 360 degrees)
 	var horizontal = Input.get_action_strength( get_action("right") ) - Input.get_action_strength( get_action("left") )
 	var vertical = Input.get_action_strength( get_action("down") ) - Input.get_action_strength( get_action("up") )
@@ -323,9 +357,10 @@ func _integrate_forces(state):
 		
 		# TO DO: Create a sort of slow motion effect
 		
-		# the water gun, however, shoots constantly
-		# TO DO: Probably some more guns that shoot constantly
-		if CUR_WEAPON == 1:
+		# Some guns shoot constantly: water gun, fire bolt gun, and the axe (it "chops" constantly)
+		# For those guns, we run a timer to make sure there's some delay between "shots"
+		var constant_shooting_weapons = [1,3,4]
+		if CUR_WEAPON in constant_shooting_weapons:
 			if last_shot <= 0.0:
 				shoot(movement)
 			else:
@@ -377,6 +412,22 @@ func _integrate_forces(state):
 	if standing_on_ice: damp_factor = 0.99
 	VELOCITY.x *= damp_factor
 	
+	# Check if we should play movement sound effects/animations
+	var sound_to_play = null
+	
+	# if we're in the air, play no sound?
+	if standing_on_ice:
+		sound_to_play = "ice_running"
+	elif bodies_below_us.size() == 0:
+		sound_to_play = null
+	elif abs(VELOCITY.x) > 50:
+		if cur_water > 0.1:
+			sound_to_play = "puddle_running"
+		else:
+			sound_to_play = "dirt_running"
+	
+	play_footstep_sound(sound_to_play)
+	
 	# Finally, set the velocity we calculated
 	state.set_linear_velocity(VELOCITY)
 	
@@ -410,6 +461,7 @@ func shoot(dir):
 	
 	# start variable for new bullet
 	var new_bullet = null
+	var impulse_speed = 300
 	
 	# reset the last shot variable
 	last_shot = 0.4
@@ -437,7 +489,7 @@ func shoot(dir):
 #		new_bullet.set_position( get_position() + dir * (tree_size + player_size))
 		
 		# add impulse to sapling
-		new_bullet.apply_central_impulse(dir * 200)
+		new_bullet.apply_central_impulse(dir * impulse_speed)
 		
 		# update our sapling counter
 		update_saplings(-1)
@@ -458,7 +510,7 @@ func shoot(dir):
 		new_bullet.add_collision_exception_with(self)
 		
 		# add impulse to sapling
-		new_bullet.apply_central_impulse(dir * 200)
+		new_bullet.apply_central_impulse(dir * impulse_speed)
 		
 		# update our sapling counter
 		update_water_gun(-1.0)
@@ -468,31 +520,99 @@ func shoot(dir):
 	###
 	elif CUR_WEAPON == 2:
 		# create a new bullet
-		new_bullet = tree_bullet.instance()
+		new_bullet = log_bullet.instance()
 		
 		# rotate it to face the direction it's flying in
-		var angle = acos( dir.dot(Vector2(1,0)) )
-		new_bullet.set_rotation(-angle)
+		new_bullet.transform[0] = dir
+		new_bullet.transform[1] = Vector2(-dir.y, dir.x)
+		new_bullet.transform.origin = transform.origin
 		
 		# position it just outside of our player rectangle
+		# TO DO: Make this better 
+		# => perhaps create collision exception with player, only for the first few seconds?
 		var tree_size = new_bullet.get_node("CollisionShape2D").shape.extents.x * 2
-		var player_size = 30
+		var player_size = 15
 		
 		new_bullet.set_position( get_position() + dir * (tree_size + player_size))
 		
-		# add impulse to tree
-		new_bullet.apply_central_impulse(dir * 500)
+		# add impulse to log
+		new_bullet.apply_central_impulse(dir * impulse_speed)
 	
-	# finally, add this particular bullet to the world
-	get_node("/root/Node2D/TreesLayer").call_deferred("add_child", new_bullet)
+	###
+	# FIRE BOLT BULLET
+	###
+	elif CUR_WEAPON == 3:
+		# create a new bullet
+		new_bullet = fire_bolt.instance()
+		
+		# don't allow it to hit ourselves
+		new_bullet.add_collision_exception_with(self)
+		
+		# position it
+		new_bullet.transform.origin = transform.origin
+		
+		# add impulse to bolt
+		new_bullet.apply_central_impulse(dir * impulse_speed * 2)
+	
+	###
+	# AXE
+	###
+	elif CUR_WEAPON == 4:
+		var ca = get_node("/root/Node2D/CellularAutomata/Control/ColorRect")
+		
+		# loop through all bodies we are touching
+		# TO DO: Only affect bodies in the direction we're aiming?
+		var bodies = $AttractArea.get_overlapping_bodies()
+		for body in bodies:
+			# check if body is in the direction we're aiming
+			# if not, don't consider it
+			var diff_vec = (body.transform.origin - transform.origin).normalized()
+			var dot = dir.dot(diff_vec)
+			if abs(acos(dot)) > 0.5*PI:
+				continue
+			
+			# if it's a tree or a log ...
+			if body.is_in_group("OxygenGivers"):
+				# ... damage it (until it will eventually break)
+				body.damage(-0.35)
+			
+			# if it's an ice block ...
+			elif body.is_in_group("FreezedBlocks"):
+				# save an impulse that unfreezes this block
+				# NOTE: This simply heats the block ... maybe there's a better way
+				#       (like, un-null a value?)
+				ca.saved_impulses.append( [ body.get_position(), 1.0, 1] )
+				
+	
+	if new_bullet != null:
+		# finally, add this particular bullet to the world
+		get_node("/root/Node2D/TreesLayer").call_deferred("add_child", new_bullet)
 	
 	# play sound effect
 	play_sound("shoot")
 
+# What's the difference between play_sound and play_footstep_sound?
+#  => play_sound will play any sound, overriding the previous sound, and randomly changing pitch
+#  => play_footstep_sound will only play a new sound if it's not already playing, and doesn't change pitch
+
+func play_footstep_sound(file_name):
+	var player = $FootstepPlayer
+	
+	if file_name == null:
+		player.stop()
+		return
+	
+	if not player.is_playing():
+		player.stream = load("res://Sound/" + str(file_name) + ".wav")
+		# player.pitch_scale = rand_range(0.8, 1.2)
+		player.play()
+
 func play_sound(file_name):
-	$AudioPlayer.stream = load("res://Sound/" + str(file_name) + ".wav")
-	$AudioPlayer.pitch_scale = rand_range(0.8, 1.2)
-	$AudioPlayer.play()
+	var player = $AudioPlayer
+	
+	player.stream = load("res://Sound/" + str(file_name) + ".wav")
+	player.pitch_scale = rand_range(0.8, 1.2)
+	player.play()
 
 func _on_AttractArea_body_entered(body):
 	if body.is_in_group("Saplings"):

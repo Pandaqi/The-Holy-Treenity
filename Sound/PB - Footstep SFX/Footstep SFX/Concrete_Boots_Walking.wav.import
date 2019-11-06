@@ -1,0 +1,21 @@
+[remap]
+
+importer="wav"
+type="AudioStreamSample"
+path="res://.import/Concrete_Boots_Walking.wav-fc9a7f4a670bdee6cc231fb61dbc79ef.sample"
+
+[deps]
+
+source_file="res://Sound/PB - Footstep SFX/Footstep SFX/Concrete_Boots_Walking.wav"
+dest_files=[ "res://.import/Concrete_Boots_Walking.wav-fc9a7f4a670bdee6cc231fb61dbc79ef.sample" ]
+
+[params]
+
+force/8_bit=false
+force/mono=false
+force/max_rate=false
+force/max_rate_hz=44100
+edit/trim=true
+edit/normalize=true
+edit/loop=false
+compress/mode=0

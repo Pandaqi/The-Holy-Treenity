@@ -1,0 +1,21 @@
+[remap]
+
+importer="wav"
+type="AudioStreamSample"
+path="res://.import/puddle_running.wav-65d714a6d1a20cc04648d58a12a9fd05.sample"
+
+[deps]
+
+source_file="res://Sound/puddle_running.wav"
+dest_files=[ "res://.import/puddle_running.wav-65d714a6d1a20cc04648d58a12a9fd05.sample" ]
+
+[params]
+
+force/8_bit=false
+force/mono=false
+force/max_rate=false
+force/max_rate_hz=44100
+edit/trim=true
+edit/normalize=true
+edit/loop=false
+compress/mode=0

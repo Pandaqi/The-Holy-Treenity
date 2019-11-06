@@ -13,10 +13,6 @@ func initialize(i):
 	
 	# Set weapon to correct frame
 	get_node("Sprite").frame = i
-	
-	# Don't collide with players => players need to check for OVERLAP (to pick up weapons)
-	for player in get_tree().get_nodes_in_group("Players"):
-		add_collision_exception_with(player)
 
 func _integrate_forces(state):
 	# call inherited function

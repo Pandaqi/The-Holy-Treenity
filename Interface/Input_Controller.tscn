@@ -1,0 +1,102 @@
+[gd_scene load_steps=4 format=2]
+
+[ext_resource path="res://Scripts/Input_Controller.gd" type="Script" id=1]
+[ext_resource path="res://Textures/PackageHealthBar.png" type="Texture" id=2]
+[ext_resource path="res://Interface/TinyDynamicFont.tres" type="DynamicFont" id=3]
+
+[node name="Input_Controller" type="HBoxContainer"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+rect_min_size = Vector2( 0, 200 )
+size_flags_horizontal = 3
+size_flags_vertical = 3
+custom_constants/separation = 20
+alignment = 1
+script = ExtResource( 1 )
+
+[node name="TextureRect1" type="TextureRect" parent="."]
+margin_right = 241.0
+margin_bottom = 768.0
+size_flags_horizontal = 3
+size_flags_vertical = 3
+texture = ExtResource( 2 )
+expand = true
+stretch_mode = 1
+
+[node name="Text" type="RichTextLabel" parent="TextureRect1"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+rect_min_size = Vector2( 0, 200 )
+size_flags_horizontal = 3
+size_flags_vertical = 3
+custom_fonts/normal_font = ExtResource( 3 )
+custom_colors/default_color = Color( 0, 0, 0, 1 )
+bbcode_enabled = true
+bbcode_text = "Press any button to login your controller"
+text = "Press any button to login your controller"
+
+[node name="TextureRect2" type="TextureRect" parent="."]
+margin_left = 261.0
+margin_right = 502.0
+margin_bottom = 768.0
+size_flags_horizontal = 3
+size_flags_vertical = 3
+texture = ExtResource( 2 )
+expand = true
+stretch_mode = 1
+
+[node name="Text" type="RichTextLabel" parent="TextureRect2"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+rect_min_size = Vector2( 0, 200 )
+size_flags_horizontal = 3
+size_flags_vertical = 3
+custom_fonts/normal_font = ExtResource( 3 )
+custom_colors/default_color = Color( 0, 0, 0, 1 )
+bbcode_enabled = true
+bbcode_text = "Press any button to login your controller"
+text = "Press any button to login your controller"
+
+[node name="TextureRect3" type="TextureRect" parent="."]
+margin_left = 522.0
+margin_right = 763.0
+margin_bottom = 768.0
+size_flags_horizontal = 3
+size_flags_vertical = 3
+texture = ExtResource( 2 )
+expand = true
+stretch_mode = 1
+
+[node name="Text" type="RichTextLabel" parent="TextureRect3"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+rect_min_size = Vector2( 0, 200 )
+size_flags_horizontal = 3
+size_flags_vertical = 3
+custom_fonts/normal_font = ExtResource( 3 )
+custom_colors/default_color = Color( 0, 0, 0, 1 )
+bbcode_enabled = true
+bbcode_text = "Press any button to login your controller"
+text = "Press any button to login your controller"
+
+[node name="TextureRect4" type="TextureRect" parent="."]
+margin_left = 783.0
+margin_right = 1024.0
+margin_bottom = 768.0
+size_flags_horizontal = 3
+size_flags_vertical = 3
+texture = ExtResource( 2 )
+expand = true
+stretch_mode = 1
+
+[node name="Text" type="RichTextLabel" parent="TextureRect4"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+rect_min_size = Vector2( 0, 200 )
+size_flags_horizontal = 3
+size_flags_vertical = 3
+custom_fonts/normal_font = ExtResource( 3 )
+custom_colors/default_color = Color( 0, 0, 0, 1 )
+bbcode_enabled = true
+bbcode_text = "Press any button to login your controller"
+text = "Press any button to login your controller"

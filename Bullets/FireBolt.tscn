@@ -1,0 +1,25 @@
+[gd_scene load_steps=5 format=2]
+
+[ext_resource path="res://Scripts/FireBolt.gd" type="Script" id=1]
+[ext_resource path="res://Textures/Trees/fire_bolt.png" type="Texture" id=2]
+[ext_resource path="res://Effects/Fire.tscn" type="PackedScene" id=3]
+
+[sub_resource type="CircleShape2D" id=1]
+radius = 8.0
+
+[node name="FireBolt" type="RigidBody2D" groups=[
+"FireBolts",
+]]
+continuous_cd = 1
+contacts_reported = 1
+contact_monitor = true
+script = ExtResource( 1 )
+
+[node name="Sprite" type="Sprite" parent="."]
+modulate = Color( 5, 3, 2, 1 )
+texture = ExtResource( 2 )
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+shape = SubResource( 1 )
+
+[node name="FireEffect" parent="." instance=ExtResource( 3 )]

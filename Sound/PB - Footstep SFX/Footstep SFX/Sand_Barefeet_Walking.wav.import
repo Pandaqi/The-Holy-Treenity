@@ -1,0 +1,21 @@
+[remap]
+
+importer="wav"
+type="AudioStreamSample"
+path="res://.import/Sand_Barefeet_Walking.wav-221d3205dafb6f7d9daafb0425b9e879.sample"
+
+[deps]
+
+source_file="res://Sound/PB - Footstep SFX/Footstep SFX/Sand_Barefeet_Walking.wav"
+dest_files=[ "res://.import/Sand_Barefeet_Walking.wav-221d3205dafb6f7d9daafb0425b9e879.sample" ]
+
+[params]
+
+force/8_bit=false
+force/mono=false
+force/max_rate=false
+force/max_rate_hz=44100
+edit/trim=true
+edit/normalize=true
+edit/loop=false
+compress/mode=0

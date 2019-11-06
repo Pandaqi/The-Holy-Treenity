@@ -1,0 +1,21 @@
+[remap]
+
+importer="wav"
+type="AudioStreamSample"
+path="res://.import/NormalWood_Barefeet_Walking.wav-e5b0b252c2b37987d588038f986b0ece.sample"
+
+[deps]
+
+source_file="res://Sound/PB - Footstep SFX/Footstep SFX/NormalWood_Barefeet_Walking.wav"
+dest_files=[ "res://.import/NormalWood_Barefeet_Walking.wav-e5b0b252c2b37987d588038f986b0ece.sample" ]
+
+[params]
+
+force/8_bit=false
+force/mono=false
+force/max_rate=false
+force/max_rate_hz=44100
+edit/trim=true
+edit/normalize=true
+edit/loop=false
+compress/mode=0

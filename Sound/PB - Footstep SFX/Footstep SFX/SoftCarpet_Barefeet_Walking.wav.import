@@ -1,0 +1,21 @@
+[remap]
+
+importer="wav"
+type="AudioStreamSample"
+path="res://.import/SoftCarpet_Barefeet_Walking.wav-512ff3456e2b13e6584367c481d48b5f.sample"
+
+[deps]
+
+source_file="res://Sound/PB - Footstep SFX/Footstep SFX/SoftCarpet_Barefeet_Walking.wav"
+dest_files=[ "res://.import/SoftCarpet_Barefeet_Walking.wav-512ff3456e2b13e6584367c481d48b5f.sample" ]
+
+[params]
+
+force/8_bit=false
+force/mono=false
+force/max_rate=false
+force/max_rate_hz=44100
+edit/trim=true
+edit/normalize=true
+edit/loop=false
+compress/mode=0

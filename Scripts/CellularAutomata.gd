@@ -93,7 +93,7 @@ func new_generation():
 					obj.start_fire()
 					
 					# increase oxygen (as this is an oxygen giver)
-					impulses.append( [true_position, 0.2, 0] )
+					impulses.append( [true_position, obj.get_oxygen_level(), 0] )
 	
 	for obj in get_tree().get_nodes_in_group("OxygenTakers"):
 		var true_position = get_safe_position( obj.get_position() )
@@ -129,11 +129,19 @@ func new_generation():
 	
 	###
 	# Giving/taking heat
+	#  => Players/living creatures emit heat
+	#  => And fire bolts, of course
 	###
 	for obj in get_tree().get_nodes_in_group("WarmthGivers"):
 		var true_position = get_safe_position( obj.get_position() )
 		
 		impulses.append( [true_position, 0.2, 1] )
+	
+	for obj in get_tree().get_nodes_in_group("FireBolts"):
+		var true_position = get_safe_position( obj.get_position() )
+		
+		impulses.append( [true_position, 0.5, 1] )
+		
 	
 	get_node("Semaphore").calculate_new_grid(impulses)
 

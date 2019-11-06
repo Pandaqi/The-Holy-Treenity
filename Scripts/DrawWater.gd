@@ -29,20 +29,23 @@ func _draw():
 			# (anchor it to the bottom, that's why we do (y+1)*32 - height)
 			
 			# Normal tile => transparent, blue-ish color + dynamic height
-			var col = Color(0.6, 0.6, 1, 0.5)
+			var col = Color(0.5, 0.5, 1, 0.5)
 			var height = min(val, 1.0) * 32
+			var waterfall_drawn = false
 			
 			# Ice tile => opaque white color, fixed full height
 			if ice_block:
 				col = Color(1.0, 1.0, 1.0, 1.0)
 				height = 32
-			
-			# Check if block above has water, if so, always set to full water
-			var val_above = grid[ int(y - 1) % int(MAP_SIZE.y) ][x]
-			
-			if val_above.size() > 0 and val_above[2] != null:
-				if val_above[2] > 0:
-					height = 32
+			else:
+				# Check if block above has water, if so, always set to full water
+				var val_above = grid[ int(y - 1) % int(MAP_SIZE.y) ][x]
+				
+				if val_above.size() > 0 and val_above[2] != null:
+					if val_above[2] > 0:
+						height = 32
+						col = Color(0.5, 0.5, 1, 0.2)
+						waterfall_drawn = true
 
 			# TO DO: Use pressure => if a cell has a value higher than 8.0, we push water upwards
 			
@@ -56,6 +59,19 @@ func _draw():
 			
 			var rect = Rect2(Vector2(x * 32, (y+1) * 32 - height), Vector2(32, height))
 			draw_rect(rect, col)
+			
+			# if we've drawn a waterfall ...
+			if waterfall_drawn:
+				var val_below = grid[ int(y + 1) % int(MAP_SIZE.y) ][x]
+				
+				# but this tile has SOLID ground below it ...
+				if val_below.size() == 0 or val_below[2] == null:
+					# draw the actual water again!
+					col = Color(0.5, 0.5, 1, 0.5)
+					height = min(val, 1.0) * 32
+					
+					rect = Rect2(Vector2(x * 32, (y+1) * 32 - height), Vector2(32, height))
+					draw_rect(rect, col)
 
 func draw_water(grid, MAP_SIZE):
 	self.grid = grid
