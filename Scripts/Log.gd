@@ -50,9 +50,6 @@ func react_to_collision(pos, normal, body):
 	
 	print("Log hit something")
 	
-	# turn log static
-	#call_deferred("set_mode", RigidBody2D.MODE_STATIC)
-	
 	turned_static = true
 	
 	# remove the old log
@@ -73,8 +70,6 @@ func react_to_collision(pos, normal, body):
 
 	static_body.get_node("CollisionShape2D").set_position( offset)
 	static_body.get_node("Sprite").set_position( offset)
-
-	static_body.set_meta("anchor_offset", offset / get_node("Sprite").get_scale() )
 
 	# add static body to the tree
 	get_node("/root/Node2D").call_deferred("add_child", static_body)

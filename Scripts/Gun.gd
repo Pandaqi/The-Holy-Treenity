@@ -28,7 +28,7 @@ func _integrate_forces(state):
 		state.set_transform( xform )
 		
 		var rand_vector = Vector2(rand_range(-1,1), rand_range(-1,1)).normalized()
-		state.apply_central_impulse(rand_vector * 50)
+		state.apply_central_impulse(rand_vector * 150)
 		
 		# set it to be enabled
 		disabled = false

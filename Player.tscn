@@ -1,8 +1,8 @@
-[gd_scene load_steps=20 format=2]
+[gd_scene load_steps=25 format=2]
 
 [ext_resource path="res://Scripts/Player.gd" type="Script" id=1]
 [ext_resource path="res://Textures/Characters/aiming_arrow.png" type="Texture" id=2]
-[ext_resource path="res://Textures/Characters/character0.png" type="Texture" id=3]
+[ext_resource path="res://Textures/Characters/character_spritesheet.png" type="Texture" id=3]
 [ext_resource path="res://Interface/GasMeter.tscn" type="PackedScene" id=4]
 [ext_resource path="res://Textures/Interface/sapling.png" type="Texture" id=5]
 [ext_resource path="res://Textures/Interface/icon_spritesheet.png" type="Texture" id=6]
@@ -11,12 +11,18 @@
 [ext_resource path="res://Shaders/Outline Shader.shader" type="Shader" id=9]
 [ext_resource path="res://Textures/gun_spritesheet.png" type="Texture" id=10]
 [ext_resource path="res://Animations/Almost Dying.tres" type="Animation" id=11]
+[ext_resource path="res://Animations/Chopping.tres" type="Animation" id=12]
+[ext_resource path="res://Animations/Dying.tres" type="Animation" id=13]
+[ext_resource path="res://Animations/Idle.tres" type="Animation" id=14]
+[ext_resource path="res://Animations/Jumping.tres" type="Animation" id=15]
+[ext_resource path="res://Animations/Running.tres" type="Animation" id=16]
 
 [sub_resource type="PhysicsMaterial" id=1]
 friction = 0.0
 
 [sub_resource type="CapsuleShape2D" id=2]
-height = 10.0
+radius = 11.0672
+height = 25.0
 
 [sub_resource type="RectangleShape2D" id=3]
 extents = Vector2( 9, 5 )
@@ -72,14 +78,17 @@ texture = ExtResource( 2 )
 offset = Vector2( 24, 0 )
 
 [node name="Sprite" type="Sprite" parent="."]
-scale = Vector2( 0.5, 0.5 )
+scale = Vector2( 0.75, 0.75 )
 texture = ExtResource( 3 )
+vframes = 3
+hframes = 4
+frame = 9
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
 shape = SubResource( 2 )
 
 [node name="Area2D" type="Area2D" parent="."]
-position = Vector2( 0, 20 )
+position = Vector2( 0, 28 )
 collision_layer = 10
 collision_mask = 10
 
@@ -97,15 +106,15 @@ position = Vector2( 205.805, 47.6099 )
 scale = Vector2( 0.4, 0.4 )
 
 [node name="OxygenLevels" parent="Interface" instance=ExtResource( 4 )]
-position = Vector2( 194.15, 84.2754 )
+position = Vector2( 199.725, 84.2754 )
 scale = Vector2( 0.2, 0.2 )
 
 [node name="HeatLevels" parent="Interface" instance=ExtResource( 4 )]
-position = Vector2( 180.554, 107.002 )
+position = Vector2( 190.509, 107.002 )
 scale = Vector2( 0.2, 0.2 )
 
 [node name="ThirstLevels" parent="Interface" instance=ExtResource( 4 )]
-position = Vector2( 173.671, 129.322 )
+position = Vector2( 180.44, 129.322 )
 scale = Vector2( 0.2, 0.2 )
 
 [node name="SaplingSprite" type="Sprite" parent="Interface"]
@@ -171,7 +180,6 @@ local_coords = false
 process_material = SubResource( 6 )
 
 [node name="AttractArea" type="Area2D" parent="."]
-editor/display_folded = true
 collision_layer = 21
 collision_mask = 21
 
@@ -179,15 +187,16 @@ collision_mask = 21
 shape = SubResource( 7 )
 
 [node name="WeaponIcon" type="Sprite" parent="."]
+visible = false
 material = SubResource( 8 )
-position = Vector2( 0, -42 )
+position = Vector2( 0, -50 )
 scale = Vector2( 0.75, 0.75 )
 texture = ExtResource( 10 )
 hframes = 5
 frame = 3
 
 [node name="PlayerLabel" type="Sprite" parent="."]
-position = Vector2( 0, -32 )
+position = Vector2( 0, -40 )
 scale = Vector2( 0.5, 0.5 )
 texture = ExtResource( 8 )
 hframes = 4
@@ -201,5 +210,12 @@ volume_db = 1.0
 
 [node name="AnimationPlayer" type="AnimationPlayer" parent="."]
 "anims/Almost Dying" = ExtResource( 11 )
+
+[node name="SpritesheetPlayer" type="AnimationPlayer" parent="."]
+anims/Chopping = ExtResource( 12 )
+anims/Dying = ExtResource( 13 )
+anims/Idle = ExtResource( 14 )
+anims/Jumping = ExtResource( 15 )
+anims/Running = ExtResource( 16 )
 [connection signal="body_entered" from="AttractArea" to="." method="_on_AttractArea_body_entered"]
 [connection signal="body_exited" from="AttractArea" to="." method="_on_AttractArea_body_exited"]

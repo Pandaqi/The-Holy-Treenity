@@ -11,6 +11,8 @@ var MOVE_SPEED = 100
 var JUMP_SPEED = 500
 var MAX_SPEED = 250
 
+var PLAYER_SCALE = 0.75
+
 var last_known_movement = Vector2.ZERO
 
 # Bullet scenes
@@ -31,10 +33,10 @@ var OXYGEN = 1.0
 var HEAT = 0.5
 var THIRST = 1.0
 
-var OXYGEN_MINIMUM = 0.25
-var HEAT_MINUMUM = 0.25
-var HEAT_MAXIMUM = 0.75
-var THIRST_MINIMUM = 0.25
+var OXYGEN_MINIMUM = 0.15
+var HEAT_MINIMUM = 0.15
+var HEAT_MAXIMUM = 0.85
+var THIRST_MINIMUM = 0.15
 
 var cur_water = 0.0
 
@@ -263,7 +265,7 @@ func check_environment(delta, val):
 	
 	# Check if our current heat should damage us
 	var cur_heat = HEAT
-	if cur_heat < HEAT_MINUMUM:
+	if cur_heat < HEAT_MINIMUM:
 		damage += 0.01 * delta
 		play_meter_anim("HeatLevels", true)
 	elif cur_heat > HEAT_MAXIMUM:
@@ -340,17 +342,29 @@ func update_health(dh):
 		get_node("AnimationPlayer").play("Almost Dying")
 	
 	# if we have no health left, die!
-	elif HEALTH <= 0:
+	if HEALTH <= 0.0:
 		# set this player to inactive
 		dead = true
 		
-		# inform the game that a player died
-		get_node("/root/Node2D").player_died()
+		# throw out our weapon
+		equip_weapon(null)
 		
-		# TO DO: play an animation/particle effect to show we died
+		# play an animation to show we died
+		get_node("AnimationPlayer").stop()
+		get_node("SpritesheetPlayer").play("Dying")
 		
-		# TO DO: remove player from the world
-		# self.queue_free()
+		# TO DO: Also play sound effect, and add particles??
+
+func death_animation_done():
+	# inform the game that a player died
+	get_node("/root/Node2D").player_died()
+	
+	# grey out the interface
+	# and stop any animations that might be running
+	my_interface.modulate = Color(0.4, 0.4, 0.4)
+	play_meter_anim("OxygenLevels", false)
+	play_meter_anim("HeatLevels", false)
+	play_meter_anim("ThirstLevels", false)
 
 func play_meter_anim(node_name, out_of_bounds):
 	var cur_node = my_interface.get_node(node_name)
@@ -465,19 +479,43 @@ func _integrate_forces(state):
 	
 	# Check if we should play movement sound effects/animations
 	var sound_to_play = null
+	var animation_to_play = "Idle"
 	
-	# if we're in the air, play no sound?
+	# if we have the axe AND we're pressing the chopchop button
+	if CUR_WEAPON == 4 and Input.is_action_pressed( get_action("shoot") ):
+		animation_to_play = "Chopping"
+		
+	# if we're standing on ice, play the ice sound
 	if standing_on_ice:
 		sound_to_play = "ice_running"
-	elif bodies_below_us.size() == 0:
+	
+	# if we're in the air ...
+	# yeah ... we hit ourselves with the area, that's why there's always a single body
+	# still need to find a cleaner way to solve this in Godot
+	elif bodies_below_us.size() <= 1:
+		
+		# if we're in the air, play no sound?
 		sound_to_play = null
-	elif abs(VELOCITY.x) > 50:
+		
+		# play the "floating/jumping" animation
+		animation_to_play = "Jumping"
+	
+	# if we're on the ground and making some speed ...
+	elif abs(VELOCITY.x) > 30:
+		animation_to_play = "Running"
 		if cur_water > 0.1:
 			sound_to_play = "puddle_running"
 		else:
 			sound_to_play = "dirt_running"
 	
+	# make player face the right direction
+	if VELOCITY.x > 0:
+		get_node("Sprite").set_scale( Vector2(-1,1) * PLAYER_SCALE )
+	else:
+		get_node("Sprite").set_scale( Vector2(1,1) * PLAYER_SCALE)
+	
 	play_footstep_sound(sound_to_play)
+	play_anim(animation_to_play)
 	
 	# Finally, set the velocity we calculated
 	state.set_linear_velocity(VELOCITY)
@@ -505,6 +543,13 @@ func level_wrap(state):
 	if Vector2(wrap_x - cur_pos.x, wrap_y - cur_pos.y).length() > 0.1:
 		xform.origin = Vector2(wrap_x, wrap_y)
 		state.set_transform( xform )
+
+func play_anim(anim_name):
+	if anim_name == null:
+		$SpritesheetPlayer.stop()
+		return
+	
+	$SpritesheetPlayer.play(anim_name)
 
 func swap_weapons(body):
 	var other_weapon = body.cur_weapon_obj
@@ -643,7 +688,7 @@ func shoot(dir):
 			# if it's a tree or a log ...
 			if body.is_in_group("OxygenGivers"):
 				# ... damage it (until it will eventually break)
-				body.damage(-0.35)
+				body.damage(-0.35, true)
 			
 			# if it's an ice block ...
 			elif body.is_in_group("FreezedBlocks"):

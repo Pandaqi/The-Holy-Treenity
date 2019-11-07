@@ -26,14 +26,16 @@ func drop_sapling():
 	if sapling_timer != null:
 		sapling_timer.set_wait_time(rand_range(time_between_saplings.x, time_between_saplings.y))
 
-func damage(dh):
+func damage(dh, good_damage = false):
 	HEALTH += dh
 	
 	if HEALTH <= 0:
 		if fire_effect != null:
 			fire_effect.queue_free()
-		else:
-			# if we didn't die by fire, drop saplings!
+			fire_effect = null
+		
+		if good_damage:
+			# if we died by chopping ("good damage"), drop saplings!
 			var rand_num = randi() % 4 + 1
 			for i in range(rand_num):
 				drop_sapling()

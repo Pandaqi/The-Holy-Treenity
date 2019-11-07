@@ -11,6 +11,7 @@ export (int) var TIMER = 3 * 60 # default to three minutes
 var players_alive = 1 # Is automatically set to number of players in the game
 
 export (PoolVector2Array) var player_positions = [Vector2(10,10), Vector2(10,10), Vector2(10,10), Vector2(10,10)]
+export (PoolVector2Array) var weapon_positions = [Vector2(16,7), Vector2(7,4), Vector2(16,7), Vector2(7,4), Vector2(29,15)]
 
 var i_size = Vector2(300, 300)
 var interface_occlusions = [
@@ -54,7 +55,7 @@ func _ready():
 	# instantiate all the weapons
 	for i in range(5):
 		var new_gun = gun_scene.instance()
-		new_gun.set_position( Vector2(rand_range(0,MAP_SIZE.x*32), rand_range(0,MAP_SIZE.y*32)) )
+		new_gun.set_position( weapon_positions[i] * 32 )
 		
 		# add gun to the tree
 		add_child(new_gun)
