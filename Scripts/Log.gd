@@ -36,7 +36,7 @@ func _integrate_forces(state):
 	# Slowly scale the collision shape upwards
 	# Also scale the sprite
 	var old_scale = $CollisionShape2D.shape.get_extents()
-	var scale_speed = 1.02
+	var scale_speed = 1.075
 	if old_scale.x <= 32:
 		$Sprite.set_scale( $Sprite.get_scale() * scale_speed)
 		$CollisionShape2D.shape.set_extents(old_scale * scale_speed)

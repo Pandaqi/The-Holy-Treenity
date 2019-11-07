@@ -23,6 +23,8 @@ onready var fire_bolt = preload("res://Bullets/FireBolt.tscn")
 onready var tilemap = get_node("/root/Node2D/TileMap")
 onready var my_interface = get_node("Interface")
 
+onready var ca = get_node("/root/Node2D/CellularAutomata/Control/ColorRect")
+
 # Player variables for the environment => what kills you and what doesn't?
 var HEALTH = 1.0
 var OXYGEN = 1.0
@@ -44,6 +46,8 @@ var SAPLINGS = 0
 var AVAILABLE_WATER = 0.0
 
 var last_shot = 0.0
+var weapon_swap = false
+var constant_shooting_weapons = [1,3,4]
 
 
 var bodies_to_attract = []
@@ -51,6 +55,7 @@ var guns_in_range = []
 
 var interface_positions = [Vector2(0,0), Vector2(1024,0), Vector2(0, 768), Vector2(1024,768)]
 var interface_flips = [Vector2(1,1), Vector2(-1, 1), Vector2(1, -1), Vector2(-1, -1)]
+var player_colors = [Color(1,0.5,0.5), Color(0.5,0.5,1), Color(1,0.5,1), Color(0.5, 1, 1)]
 
 var dead = false
 
@@ -79,6 +84,27 @@ func _ready():
 	
 	# but flip the counter back, so it's still readable
 	my_interface.get_node("SaplingCounter").set_scale( my_flips )
+	my_interface.get_node("PlayerLabel").set_scale( 0.5 * my_flips )
+	my_interface.get_node("PlayerLabel").frame = player_num
+	
+	# and flip the icons
+	var icons = ["HP_Icon", "Oxygen_Icon", "Heat_Icon", "Thirst_Icon"]
+	for icon in icons:
+		var cur_node = my_interface.get_node(icon)
+		var old_scale = cur_node.get_scale()
+		cur_node.set_scale( Vector2(old_scale.x * my_flips.x, old_scale.y * my_flips.y) )
+	
+	# color the player label in the interface
+	my_interface.get_node("PlayerLabel").modulate = player_colors[player_num]
+	
+	# set outline shader to the correct color
+	var dup_shader = get_node("WeaponIcon").material.duplicate(true)
+	dup_shader.set_shader_param("outline_color", player_colors[player_num].darkened(0.3))
+	get_node("WeaponIcon").material = dup_shader
+	
+	# set frame + color for player label
+	get_node("PlayerLabel").frame = player_num
+	get_node("PlayerLabel").modulate = player_colors[player_num]
 
 func set_controller(player_num, device_num):
 	self.control_num = device_num
@@ -131,7 +157,7 @@ func _physics_process(delta):
 			# otherwise, check distance to gun
 			# if below the gun collision radius (30px), consider it within range
 			var dist_to_gun = (transform.origin - gun.transform.origin).length()
-			if dist_to_gun < 30:
+			if dist_to_gun < 40:
 				# increase the gun timer
 				gun.increase_timer(delta)
 				
@@ -158,9 +184,9 @@ func _physics_process(delta):
 		# using these values from the environment, update our statistics (oxygen, heat, water, etc.)
 		check_environment(delta, val)
 
-func equip_weapon(gun):
+func equip_weapon(gun, swap = false):
 	# If we HAVE a current weapon ...
-	if cur_weapon_obj != null:
+	if not swap and cur_weapon_obj != null:
 		# ... throw it out (at the right position)
 		cur_weapon_obj.enable( transform.origin )
 	
@@ -178,6 +204,7 @@ func equip_weapon(gun):
 		# Display icon over our head
 		get_node("WeaponIcon").frame = CUR_WEAPON
 		get_node("WeaponIcon").set_visible(true)
+		get_node("PlayerLabel").set_visible(false)
 		
 		# Disable the gun object (visibility and collision shape)
 		gun.disable()
@@ -186,6 +213,7 @@ func equip_weapon(gun):
 		cur_weapon_obj = null
 		
 		get_node("WeaponIcon").set_visible(false)
+		get_node("PlayerLabel").set_visible(true)
 
 
 func check_environment(delta, val):
@@ -209,7 +237,7 @@ func check_environment(delta, val):
 	# OXYGEN
 	###
 	# Transfer oxygen between us and the environment
-	var interpolation_factor = 0.8
+	var interpolation_factor = 0.99
 	OXYGEN = OXYGEN * interpolation_factor + val[0] * (1.0 - interpolation_factor)
 	
 	# if our current tile is almost completely filled with water
@@ -230,7 +258,7 @@ func check_environment(delta, val):
 	# HEAT
 	###
 	# Transfer heat between us and the environment
-	interpolation_factor = 0.8
+	interpolation_factor = 0.99
 	HEAT = HEAT * interpolation_factor + val[1] * (1.0 - interpolation_factor)
 	
 	# Check if our current heat should damage us
@@ -255,6 +283,13 @@ func check_environment(delta, val):
 	# But if we're standing in water, we automatically drink it, to balance it out
 	if cur_water > 0:
 		cur_thirst += (cur_water + 0.1) * delta
+		
+		# don't drink more than we need/can have!
+		if THIRST + cur_thirst > 1.0:
+			cur_thirst = 1.0 - THIRST
+		
+		# and of course, use a saved impulse to change water in the CA system
+		ca.saved_impulses.append( [ get_position(), cur_thirst, 2] )
 	
 	update_thirst(cur_thirst)
 	
@@ -276,8 +311,8 @@ func check_environment(delta, val):
 	# (Visually) update our meters
 	# Health meter is updated separately whenever health changes, as that might happen outside of this function
 	###
-	resize_meter("OxygenLevels", cur_oxygen) # update oxygen meter
-	resize_meter("HeatLevels", cur_heat) # update heat meter
+	resize_meter("OxygenLevels", OXYGEN) # update oxygen meter
+	resize_meter("HeatLevels", HEAT) # update heat meter
 
 func update_water_gun(dw):
 	AVAILABLE_WATER += dw
@@ -300,8 +335,12 @@ func update_health(dh):
 	
 	resize_meter("HP", HEALTH)
 	
+	# if we're running out of health, give feedback to player
+	if HEALTH <= 0.2:
+		get_node("AnimationPlayer").play("Almost Dying")
+	
 	# if we have no health left, die!
-	if HEALTH <= 0:
+	elif HEALTH <= 0:
 		# set this player to inactive
 		dead = true
 		
@@ -355,11 +394,10 @@ func _integrate_forces(state):
 	if Input.is_action_pressed( get_action("shoot") ):
 		# ... our input is redirected to aiming
 		
-		# TO DO: Create a sort of slow motion effect
+		# TO DO: Create a sort of slow motion effect??
 		
 		# Some guns shoot constantly: water gun, fire bolt gun, and the axe (it "chops" constantly)
 		# For those guns, we run a timer to make sure there's some delay between "shots"
-		var constant_shooting_weapons = [1,3,4]
 		if CUR_WEAPON in constant_shooting_weapons:
 			if last_shot <= 0.0:
 				shoot(movement)
@@ -403,9 +441,22 @@ func _integrate_forces(state):
 			VELOCITY += Vector2(0, -JUMP_SPEED)
 	
 		for body in bodies_below_us:
-			if body.is_in_group("FreezedBlocks"):
+			if body == self:
+				continue
+			elif body.is_in_group("FreezedBlocks"):
 				standing_on_ice = true
 				break
+			
+			# if we haven't just swapped ...
+			# and we're standing on a player ...
+			# after falling down ...
+			# that counts as a weapon swap
+			elif not weapon_swap:
+				if body.is_in_group("Players") and abs(VELOCITY.y) >= 0:
+					swap_weapons(body)
+					break
+	else:
+		weapon_swap = false
 	
 	# DAMPING
 	var damp_factor = 0.6
@@ -431,6 +482,7 @@ func _integrate_forces(state):
 	# Finally, set the velocity we calculated
 	state.set_linear_velocity(VELOCITY)
 	
+	# Wrap around the world
 	level_wrap(state)
 
 func level_wrap(state):
@@ -442,10 +494,28 @@ func level_wrap(state):
 	# (We also add the map size, because fmod doesn't work with negative floats)
 	var wrap_x = fmod(cur_pos.x + Global.MAP_SIZE.x*32, Global.MAP_SIZE.x*32)
 	var wrap_y = fmod(cur_pos.y + Global.MAP_SIZE.y*32, Global.MAP_SIZE.y*32)
+	
+	# for safety: make sure we never get NaN values or anything outside of level bounds
+	if wrap_x < 0 or wrap_x >= Global.MAP_SIZE.x * 32:
+		wrap_x = cur_pos.x
+	
+	if wrap_y < 0 or wrap_y >= Global.MAP_SIZE.y * 32:
+		wrap_y = cur_pos.y
+	
 	if Vector2(wrap_x - cur_pos.x, wrap_y - cur_pos.y).length() > 0.1:
 		xform.origin = Vector2(wrap_x, wrap_y)
 		state.set_transform( xform )
+
+func swap_weapons(body):
+	var other_weapon = body.cur_weapon_obj
 	
+	# give MY weapon to the other player
+	body.equip_weapon(cur_weapon_obj, true)
+	
+	# and now equip THEIR weapon, which we saved
+	equip_weapon(other_weapon, true)
+	
+	weapon_swap = true
 
 func shoot(dir):
 	# If we don't have a weapon, we can't shoot!
@@ -464,7 +534,7 @@ func shoot(dir):
 	var impulse_speed = 300
 	
 	# reset the last shot variable
-	last_shot = 0.4
+	last_shot = 0.2
 	
 	###
 	# SAPLING BULLET
@@ -558,8 +628,7 @@ func shoot(dir):
 	# AXE
 	###
 	elif CUR_WEAPON == 4:
-		var ca = get_node("/root/Node2D/CellularAutomata/Control/ColorRect")
-		
+
 		# loop through all bodies we are touching
 		# TO DO: Only affect bodies in the direction we're aiming?
 		var bodies = $AttractArea.get_overlapping_bodies()

@@ -18,18 +18,29 @@ func _integrate_forces(state):
 	# call inherited function
 	._integrate_forces(state)
 	
+	# if we should enable the gun again ...
 	if should_enable != null:
+		# place it back into the world
 		state.set_linear_velocity(Vector2.ZERO)
 		
 		var xform = state.get_transform()
-		xform.origin = should_enable + Vector2.UP * 50
+		xform.origin = should_enable
 		state.set_transform( xform )
 		
+		var rand_vector = Vector2(rand_range(-1,1), rand_range(-1,1)).normalized()
+		state.apply_central_impulse(rand_vector * 50)
+		
+		# set it to be enabled
 		disabled = false
 		
-		get_node("CollisionShape2D").call_deferred("set_disabled", false)
+		# reset stuff
+		get_node("Sprite").set_scale( Vector2(1,1) )
+		TIMER = 0.0
+		
+		# display everything again
 		get_node("Sprite").set_visible(true)
 		
+		# reset enable memory
 		should_enable = null
 
 func disable():
@@ -37,7 +48,6 @@ func disable():
 	
 	set_linear_velocity(Vector2.ZERO)
 	
-	get_node("CollisionShape2D").disabled = true
 	get_node("Sprite").set_visible(false)
 
 func enable(pos):

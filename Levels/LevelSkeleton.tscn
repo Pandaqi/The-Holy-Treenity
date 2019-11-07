@@ -1,83 +1,46 @@
-[gd_scene load_steps=23 format=2]
+[gd_scene load_steps=25 format=2]
 
 [ext_resource path="res://Scripts/Main.gd" type="Script" id=1]
-[ext_resource path="res://icon.png" type="Texture" id=2]
-[ext_resource path="res://Scripts/CellularAutomata.gd" type="Script" id=3]
-[ext_resource path="res://CellularAutomataThread.tscn" type="PackedScene" id=4]
-[ext_resource path="res://TilesetLALA.tres" type="TileSet" id=5]
-[ext_resource path="res://Scripts/Growth_Manager.gd" type="Script" id=6]
-[ext_resource path="res://Scripts/DrawWater.gd" type="Script" id=7]
-[ext_resource path="res://Interface/SmallDynamicFont.tres" type="DynamicFont" id=8]
-[ext_resource path="res://Scripts/PauseScreen.gd" type="Script" id=9]
-[ext_resource path="res://Interface/LargeDynamicFont.tres" type="DynamicFont" id=10]
-[ext_resource path="res://Interface/MainDynamicFont.tres" type="DynamicFont" id=11]
-[ext_resource path="res://Textures/rain_particle.png" type="Texture" id=12]
-[ext_resource path="res://MainEnvironment.tres" type="Environment" id=13]
-[ext_resource path="res://Sound/AudioStreamScene.tscn" type="PackedScene" id=14]
-[ext_resource path="res://Textures/towerfall_reference.png" type="Texture" id=15]
+[ext_resource path="res://Shaders/Cellular Automata.shader" type="Shader" id=2]
+[ext_resource path="res://icon.png" type="Texture" id=3]
+[ext_resource path="res://Scripts/CellularAutomata.gd" type="Script" id=4]
+[ext_resource path="res://CellularAutomataThread.tscn" type="PackedScene" id=5]
+[ext_resource path="res://Shaders/Tilemap Vignette.shader" type="Shader" id=6]
+[ext_resource path="res://TilesetLALA.tres" type="TileSet" id=7]
+[ext_resource path="res://Scripts/Growth_Manager.gd" type="Script" id=8]
+[ext_resource path="res://Shaders/Water.shader" type="Shader" id=9]
+[ext_resource path="res://Scripts/DrawWater.gd" type="Script" id=10]
+[ext_resource path="res://Interface/SmallDynamicFont.tres" type="DynamicFont" id=11]
+[ext_resource path="res://Scripts/PauseScreen.gd" type="Script" id=12]
+[ext_resource path="res://Interface/LargeDynamicFont.tres" type="DynamicFont" id=13]
+[ext_resource path="res://Interface/MainDynamicFont.tres" type="DynamicFont" id=14]
+[ext_resource path="res://Textures/rain_particle.png" type="Texture" id=15]
+[ext_resource path="res://MainEnvironment.tres" type="Environment" id=16]
+[ext_resource path="res://Sound/AudioStreamScene.tscn" type="PackedScene" id=17]
+[ext_resource path="res://Textures/towerfall_reference.png" type="Texture" id=18]
 
-[sub_resource type="Shader" id=1]
-code = "shader_type canvas_item;
-
-uniform sampler2D grid_tex;
-uniform vec2 screen_size = vec2(1024.0, 768.0);
-
-void fragment() {
-	// convert UV coordinates to screen
-	// this is in PIXELS
-	vec2 uv_to_screen = vec2( UV.x * screen_size.y * (32.0/24.0), UV.y * screen_size.y);
-	
-	// now convert these back to tilemap coordinates
-	// this is in INDICES
-	vec2 screen_to_map = vec2( floor(uv_to_screen.x / 32.0), floor(uv_to_screen.y / 32.0) );
-	
-	// and convert this back to a UV => divide by total pixel size of texture
-	// (add 0.5 to be in the center of the pixel we want; if we don't do this, we pick the value at the edge, which will lead to unpredictable resutls)
-	vec2 pixel_size = 1.0 / vec2(textureSize(grid_tex, 0));
-	vec2 map_to_uv = vec2( (screen_to_map.x + 0.5) * pixel_size.x, (screen_to_map.y + 0.5) * pixel_size.y);
-	
-	// set color based on cellular automaton texture
-	COLOR = texture(grid_tex, map_to_uv).rgba;
-}"
+[sub_resource type="ShaderMaterial" id=1]
+shader = ExtResource( 2 )
+shader_param/screen_size = Vector2( 1024, 768 )
+shader_param/grid_tex = ExtResource( 3 )
 
 [sub_resource type="ShaderMaterial" id=2]
-shader = SubResource( 1 )
+shader = ExtResource( 6 )
 shader_param/screen_size = Vector2( 1024, 768 )
-shader_param/grid_tex = ExtResource( 2 )
 
-[sub_resource type="Shader" id=10]
-code = "shader_type canvas_item;
+[sub_resource type="OpenSimplexNoise" id=3]
 
-uniform sampler2D noise_tex;
-
-void vertex() {
-	// if a vertex is exactly on the grid line, don't add waves
-	// otherwise, us a simple sine waves to let water flow
-	if( int(VERTEX.y) % 32 != 0) {
-		VERTEX.y += sin(TIME + VERTEX.x) * 2.0 - 2.0;
-	}
-}
-
-void fragment() {
-	// change alpha based on the noise texture
-	// use screen uv, otherwise it applies the WHOLE texture to a single rectangle at a time
-	// also make it scroll downwards (by adding TIME), to make waterfalls look very nice
-	COLOR.a += texture(noise_tex, SCREEN_UV + vec2(0, TIME * 0.25)).r * 0.5 - 0.25;
-}"
-
-[sub_resource type="OpenSimplexNoise" id=11]
-
-[sub_resource type="NoiseTexture" id=12]
+[sub_resource type="NoiseTexture" id=4]
 width = 1024
 height = 768
 seamless = true
-noise = SubResource( 11 )
+noise = SubResource( 3 )
 
-[sub_resource type="ShaderMaterial" id=13]
-shader = SubResource( 10 )
-shader_param/noise_tex = SubResource( 12 )
+[sub_resource type="ShaderMaterial" id=5]
+shader = ExtResource( 9 )
+shader_param/noise_tex = SubResource( 4 )
 
-[sub_resource type="ParticlesMaterial" id=14]
+[sub_resource type="ParticlesMaterial" id=6]
 emission_shape = 2
 emission_box_extents = Vector3( 200, 512, 1 )
 flag_disable_z = true
@@ -92,10 +55,9 @@ scale_random = 0.1
 
 [node name="Node2D" type="Node2D"]
 script = ExtResource( 1 )
-TIMER = 16
+TIMER = 300
 
 [node name="CellularAutomata" type="CanvasLayer" parent="."]
-editor/display_folded = true
 layer = -5
 
 [node name="Control" type="Control" parent="CellularAutomata"]
@@ -103,28 +65,29 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 
 [node name="ColorRect" type="ColorRect" parent="CellularAutomata/Control"]
-material = SubResource( 2 )
+material = SubResource( 1 )
 anchor_right = 1.0
 anchor_bottom = 1.0
-script = ExtResource( 3 )
+script = ExtResource( 4 )
 
-[node name="Semaphore" parent="CellularAutomata/Control/ColorRect" instance=ExtResource( 4 )]
+[node name="Semaphore" parent="CellularAutomata/Control/ColorRect" instance=ExtResource( 5 )]
 
 [node name="TreesLayer" type="CanvasLayer" parent="."]
 layer = -2
 
 [node name="TileMap" type="TileMap" parent="."]
+material = SubResource( 2 )
 position = Vector2( 0, -1 )
 z_index = 5
-tile_set = ExtResource( 5 )
+tile_set = ExtResource( 7 )
 cell_size = Vector2( 32, 32 )
 collision_layer = 7
 collision_mask = 7
 format = 1
-tile_data = PoolIntArray( 0, 0, 0, 1, 0, 0, 2, 0, 0, 3, 0, 0, 4, 0, 0, 5, 0, 0, 6, 0, 0, 7, 0, 0, 8, 0, 0, 9, 0, 0, 10, 0, 0, 11, 0, 0, 12, 0, 0, 13, 0, 0, 18, 0, 0, 19, 0, 0, 20, 0, 0, 21, 0, 0, 22, 0, 0, 23, 0, 0, 24, 0, 0, 25, 0, 0, 26, 0, 0, 27, 0, 0, 28, 0, 0, 29, 0, 0, 30, 0, 0, 31, 0, 0, 65543, 0, 0, 65544, 0, 0, 65545, 0, 0, 65546, 0, 0, 65557, 0, 0, 65558, 0, 0, 65559, 0, 0, 65560, 0, 0, 131079, 0, 0, 131096, 0, 0, 196608, 0, 0, 196609, 0, 0, 196610, 0, 0, 196611, 0, 0, 196636, 0, 0, 196637, 0, 0, 196638, 0, 0, 196639, 0, 0, 262144, 0, 0, 262145, 0, 0, 262146, 0, 0, 262174, 0, 0, 262175, 0, 0, 327680, 0, 0, 327681, 0, 0, 327682, 0, 0, 327690, 0, 0, 327691, 0, 0, 327700, 0, 0, 327701, 0, 0, 327710, 0, 0, 327711, 0, 0, 393216, 0, 0, 393226, 0, 0, 393237, 0, 0, 393247, 0, 0, 458752, 0, 0, 458757, 0, 0, 458758, 0, 0, 458759, 0, 0, 458760, 0, 0, 458761, 0, 0, 458762, 0, 0, 458773, 0, 0, 458774, 0, 0, 458775, 0, 0, 458776, 0, 0, 458777, 0, 0, 458778, 0, 0, 458783, 0, 0, 524288, 0, 0, 524295, 0, 0, 524296, 0, 0, 524297, 0, 0, 524298, 0, 0, 524309, 0, 0, 524310, 0, 0, 524311, 0, 0, 524312, 0, 0, 524319, 0, 0, 589824, 0, 0, 589834, 0, 0, 589835, 0, 0, 589836, 0, 0, 589843, 0, 0, 589844, 0, 0, 589845, 0, 0, 589855, 0, 0, 655360, 0, 0, 655391, 0, 0, 720896, 0, 0, 720897, 0, 0, 720898, 0, 0, 720899, 0, 0, 720900, 0, 0, 720923, 0, 0, 720924, 0, 0, 720925, 0, 0, 720926, 0, 0, 720927, 0, 0, 786432, 0, 0, 786433, 0, 0, 786434, 0, 0, 786435, 0, 0, 786460, 0, 0, 786461, 0, 0, 786462, 0, 0, 786463, 0, 0, 851968, 0, 0, 851969, 0, 0, 851998, 0, 0, 851999, 0, 0, 917515, 0, 0, 917516, 0, 0, 917517, 0, 0, 917522, 0, 0, 917523, 0, 0, 917524, 0, 0, 983051, 0, 0, 983052, 0, 0, 983053, 0, 0, 983058, 0, 0, 983059, 0, 0, 983060, 0, 0, 1048584, 0, 0, 1048585, 0, 0, 1048586, 0, 0, 1048597, 0, 0, 1048598, 0, 0, 1048599, 0, 0, 1114112, 0, 0, 1114113, 0, 0, 1114114, 0, 0, 1114115, 0, 0, 1114120, 0, 0, 1114121, 0, 0, 1114134, 0, 0, 1114135, 0, 0, 1114140, 0, 0, 1114141, 0, 0, 1114142, 0, 0, 1114143, 0, 0, 1179648, 0, 0, 1179649, 0, 0, 1179650, 0, 0, 1179651, 0, 0, 1179676, 0, 0, 1179677, 0, 0, 1179678, 0, 0, 1179679, 0, 0, 1245184, 0, 0, 1245185, 0, 0, 1245186, 0, 0, 1245187, 0, 0, 1245198, 0, 0, 1245199, 0, 0, 1245200, 0, 0, 1245201, 0, 0, 1245212, 0, 0, 1245213, 0, 0, 1245214, 0, 0, 1245215, 0, 0, 1310720, 0, 0, 1310721, 0, 0, 1310722, 0, 0, 1310723, 0, 0, 1310724, 0, 0, 1310725, 0, 0, 1310726, 0, 0, 1310745, 0, 0, 1310746, 0, 0, 1310747, 0, 0, 1310748, 0, 0, 1310749, 0, 0, 1310750, 0, 0, 1310751, 0, 0, 1376256, 0, 0, 1376257, 0, 0, 1376258, 0, 0, 1376259, 0, 0, 1376260, 0, 0, 1376261, 0, 0, 1376262, 0, 0, 1376263, 0, 0, 1376264, 0, 0, 1376265, 0, 0, 1376266, 0, 0, 1376277, 0, 0, 1376278, 0, 0, 1376279, 0, 0, 1376280, 0, 0, 1376281, 0, 0, 1376282, 0, 0, 1376283, 0, 0, 1376284, 0, 0, 1376285, 0, 0, 1376286, 0, 0, 1376287, 0, 0, 1441792, 0, 0, 1441793, 0, 0, 1441794, 0, 0, 1441795, 0, 0, 1441796, 0, 0, 1441797, 0, 0, 1441798, 0, 0, 1441799, 0, 0, 1441800, 0, 0, 1441801, 0, 0, 1441802, 0, 0, 1441813, 0, 0, 1441814, 0, 0, 1441815, 0, 0, 1441816, 0, 0, 1441817, 0, 0, 1441818, 0, 0, 1441819, 0, 0, 1441820, 0, 0, 1441821, 0, 0, 1441822, 0, 0, 1441823, 0, 0, 1507328, 0, 0, 1507329, 0, 0, 1507330, 0, 0, 1507331, 0, 0, 1507332, 0, 0, 1507333, 0, 0, 1507334, 0, 0, 1507335, 0, 0, 1507336, 0, 0, 1507337, 0, 0, 1507338, 0, 0, 1507339, 0, 0, 1507340, 0, 0, 1507341, 0, 0, 1507346, 0, 0, 1507347, 0, 0, 1507348, 0, 0, 1507349, 0, 0, 1507350, 0, 0, 1507351, 0, 0, 1507352, 0, 0, 1507353, 0, 0, 1507354, 0, 0, 1507355, 0, 0, 1507356, 0, 0, 1507357, 0, 0, 1507358, 0, 0, 1507359, 0, 0 )
+tile_data = PoolIntArray( 0, 1, 0, 1, 1, 0, 2, 1, 0, 3, 1, 0, 4, 1, 0, 5, 1, 0, 6, 1, 0, 7, 1, 0, 8, 1, 0, 9, 1, 0, 10, 1, 0, 11, 1, 0, 12, 1, 0, 13, 1, 0, 18, 1, 0, 19, 1, 0, 20, 1, 0, 21, 1, 0, 22, 1, 0, 23, 1, 0, 24, 1, 0, 25, 1, 0, 26, 1, 0, 27, 1, 0, 28, 1, 0, 29, 1, 0, 30, 1, 0, 31, 1, 0, 65543, 1, 0, 65544, 1, 0, 65545, 1, 0, 65546, 1, 0, 65557, 1, 0, 65558, 1, 0, 65559, 1, 0, 65560, 1, 0, 131079, 1, 0, 131096, 1, 0, 196608, 0, 0, 196609, 0, 0, 196610, 0, 0, 196611, 2, 0, 196636, 536870914, 0, 196637, 0, 0, 196638, 0, 0, 196639, 0, 0, 262144, 1, 0, 262145, 1, 0, 262146, 1, 0, 262174, 1, 0, 262175, 1, 0, 327680, 1, 0, 327681, 1, 0, 327682, 1, 0, 327685, 536870912, 0, 327690, 0, 0, 327691, 2, 0, 327693, 536870914, 0, 327694, 0, 0, 327695, 0, 0, 327696, 0, 0, 327697, 0, 0, 327698, 2, 0, 327700, 536870914, 0, 327701, 0, 0, 327706, 536870912, 0, 327710, 1, 0, 327711, 1, 0, 393216, 1, 0, 393221, 536870913, 0, 393226, 1, 0, 393237, 1, 0, 393242, 536870913, 0, 393247, 1, 0, 458752, 1, 0, 458757, 536870913, 0, 458758, 0, 0, 458759, 0, 0, 458760, 0, 0, 458761, 0, 0, 458762, 1, 0, 458773, 1, 0, 458774, 0, 0, 458775, 0, 0, 458776, 0, 0, 458777, 0, 0, 458778, 536870913, 0, 458783, 1, 0, 524295, 1, 0, 524296, 1, 0, 524297, 1, 0, 524298, 1, 0, 524309, 1, 0, 524310, 1, 0, 524311, 1, 0, 524312, 1, 0, 589834, 1, 0, 589835, 0, 0, 589836, 2, 0, 589843, 536870914, 0, 589844, 0, 0, 589845, 1, 0, 655375, 536870912, 0, 655376, 536870912, 0, 720896, 1, 0, 720897, 0, 0, 720898, 0, 0, 720899, 0, 0, 720900, 2, 0, 720910, 536870912, 0, 720913, 536870912, 0, 720923, 0, 0, 720924, 0, 0, 720925, 0, 0, 720926, 0, 0, 720927, 1, 0, 786432, 1, 0, 786433, 1, 0, 786434, 1, 0, 786435, 1, 0, 786460, 1, 0, 786461, 1, 0, 786462, 1, 0, 786463, 1, 0, 851968, 1, 0, 851969, 1, 0, 851998, 1, 0, 851999, 1, 0, 917515, 0, 0, 917516, 0, 0, 917517, 0, 0, 917518, 2, 0, 917521, 536870914, 0, 917522, 0, 0, 917523, 0, 0, 917524, 0, 0, 983051, 0, 0, 983052, 0, 0, 983053, 2, 0, 983058, 536870914, 0, 983059, 0, 0, 983060, 0, 0, 1048583, 536870912, 0, 1048584, 0, 0, 1048585, 0, 0, 1048586, 0, 0, 1048597, 0, 0, 1048598, 0, 0, 1048599, 0, 0, 1048600, 536870912, 0, 1114112, 0, 0, 1114113, 0, 0, 1114114, 0, 0, 1114115, 0, 0, 1114119, 536870913, 0, 1114120, 536870913, 0, 1114121, 536870913, 0, 1114134, 536870913, 0, 1114135, 536870913, 0, 1114136, 536870913, 0, 1114140, 0, 0, 1114141, 0, 0, 1114142, 0, 0, 1114143, 0, 0, 1179648, 1, 0, 1179649, 1, 0, 1179650, 1, 0, 1179651, 1, 0, 1179676, 1, 0, 1179677, 1, 0, 1179678, 1, 0, 1179679, 1, 0, 1245184, 1, 0, 1245185, 1, 0, 1245186, 1, 0, 1245187, 1, 0, 1245198, 0, 0, 1245199, 0, 0, 1245200, 0, 0, 1245201, 0, 0, 1245212, 1, 0, 1245213, 1, 0, 1245214, 1, 0, 1245215, 1, 0, 1310720, 1, 0, 1310721, 1, 0, 1310722, 1, 0, 1310723, 1, 0, 1310724, 0, 0, 1310725, 0, 0, 1310726, 0, 0, 1310745, 0, 0, 1310746, 0, 0, 1310747, 0, 0, 1310748, 1, 0, 1310749, 1, 0, 1310750, 1, 0, 1310751, 1, 0, 1376256, 1, 0, 1376257, 1, 0, 1376258, 1, 0, 1376259, 1, 0, 1376260, 1, 0, 1376261, 1, 0, 1376262, 1, 0, 1376263, 0, 0, 1376264, 0, 0, 1376265, 0, 0, 1376266, 0, 0, 1376277, 0, 0, 1376278, 0, 0, 1376279, 0, 0, 1376280, 0, 0, 1376281, 1, 0, 1376282, 1, 0, 1376283, 1, 0, 1376284, 1, 0, 1376285, 1, 0, 1376286, 1, 0, 1376287, 1, 0, 1441792, 1, 0, 1441793, 1, 0, 1441794, 1, 0, 1441795, 1, 0, 1441796, 1, 0, 1441797, 1, 0, 1441798, 1, 0, 1441799, 1, 0, 1441800, 1, 0, 1441801, 1, 0, 1441802, 1, 0, 1441813, 1, 0, 1441814, 1, 0, 1441815, 1, 0, 1441816, 1, 0, 1441817, 1, 0, 1441818, 1, 0, 1441819, 1, 0, 1441820, 1, 0, 1441821, 1, 0, 1441822, 1, 0, 1441823, 1, 0, 1507328, 1, 0, 1507329, 1, 0, 1507330, 1, 0, 1507331, 1, 0, 1507332, 1, 0, 1507333, 1, 0, 1507334, 1, 0, 1507335, 1, 0, 1507336, 1, 0, 1507337, 1, 0, 1507338, 1, 0, 1507339, 0, 0, 1507340, 0, 0, 1507341, 0, 0, 1507346, 0, 0, 1507347, 0, 0, 1507348, 0, 0, 1507349, 1, 0, 1507350, 1, 0, 1507351, 1, 0, 1507352, 1, 0, 1507353, 1, 0, 1507354, 1, 0, 1507355, 1, 0, 1507356, 1, 0, 1507357, 1, 0, 1507358, 1, 0, 1507359, 1, 0 )
 
 [node name="Growth_Manager" type="Node2D" parent="."]
-script = ExtResource( 6 )
+script = ExtResource( 8 )
 
 [node name="Weather_Manager" type="Node2D" parent="."]
 position = Vector2( 0, -1 )
@@ -132,16 +95,17 @@ position = Vector2( 0, -1 )
 [node name="WeatherLayer" type="CanvasLayer" parent="."]
 
 [node name="DrawWater" type="Node2D" parent="WeatherLayer"]
-material = SubResource( 13 )
-script = ExtResource( 7 )
+material = SubResource( 5 )
+script = ExtResource( 10 )
 
 [node name="Interface" type="CanvasLayer" parent="."]
-editor/display_folded = true
 layer = 3
 
 [node name="Control" type="Control" parent="Interface"]
 anchor_right = 1.0
 anchor_bottom = 1.0
+margin_top = -2.16382
+margin_bottom = -2.16382
 
 [node name="Timer" type="Label" parent="Interface/Control"]
 anchor_left = 0.5
@@ -151,7 +115,7 @@ anchor_bottom = 1.0
 margin_left = -37.0
 margin_top = -47.0
 margin_right = 37.0
-custom_fonts/font = ExtResource( 8 )
+custom_fonts/font = ExtResource( 11 )
 text = "3:00"
 align = 2
 
@@ -164,7 +128,7 @@ layer = 10
 visible = false
 anchor_right = 1.0
 anchor_bottom = 1.0
-script = ExtResource( 9 )
+script = ExtResource( 12 )
 
 [node name="MarginContainer" type="MarginContainer" parent="PauseScreen/Control"]
 anchor_right = 1.0
@@ -197,14 +161,14 @@ custom_constants/separation = 20
 [node name="GameOver" type="Label" parent="PauseScreen/Control/MarginContainer/CenterContainer/VBoxContainer"]
 margin_right = 583.0
 margin_bottom = 133.0
-custom_fonts/font = ExtResource( 10 )
+custom_fonts/font = ExtResource( 13 )
 text = "GAME OVER"
 
 [node name="Result" type="Label" parent="PauseScreen/Control/MarginContainer/CenterContainer/VBoxContainer"]
 margin_top = 153.0
 margin_right = 583.0
 margin_bottom = 246.0
-custom_fonts/font = ExtResource( 11 )
+custom_fonts/font = ExtResource( 14 )
 custom_colors/font_color = Color( 0.431373, 1, 0, 1 )
 text = "You won!"
 align = 1
@@ -213,7 +177,7 @@ align = 1
 margin_top = 266.0
 margin_right = 583.0
 margin_bottom = 363.0
-custom_fonts/font = ExtResource( 8 )
+custom_fonts/font = ExtResource( 11 )
 custom_colors/font_color = Color( 0.701961, 0.701961, 0.701961, 1 )
 text = "Press ENTER to restart
 Press ESC to return to menu"
@@ -225,17 +189,17 @@ rotation = 1.83259
 emitting = false
 amount = 75
 lifetime = 1.3
-process_material = SubResource( 14 )
-texture = ExtResource( 12 )
+process_material = SubResource( 6 )
+texture = ExtResource( 15 )
 
 [node name="WorldEnvironment" type="WorldEnvironment" parent="."]
-environment = ExtResource( 13 )
+environment = ExtResource( 16 )
 
-[node name="AudioStreamPlayer" parent="." instance=ExtResource( 14 )]
+[node name="AudioStreamPlayer" parent="." instance=ExtResource( 17 )]
 
 [node name="Sprite" type="Sprite" parent="."]
 visible = false
 modulate = Color( 1, 1, 1, 0.392157 )
 position = Vector2( 513.827, 378.003 )
 scale = Vector2( 0.7, 0.7 )
-texture = ExtResource( 15 )
+texture = ExtResource( 18 )

@@ -8,9 +8,17 @@ onready var player_scene = preload("res://Player.tscn")
 var level_timer = null
 export (int) var TIMER = 3 * 60 # default to three minutes
 
-var players_alive = 1 # TO DO: set to number of players in the game
+var players_alive = 1 # Is automatically set to number of players in the game
 
 export (PoolVector2Array) var player_positions = [Vector2(10,10), Vector2(10,10), Vector2(10,10), Vector2(10,10)]
+
+var i_size = Vector2(300, 300)
+var interface_occlusions = [
+	Rect2(0,0, i_size.x, i_size.y),
+	Rect2(1024-i_size.x, 0, i_size.x, i_size.y),
+	Rect2(0, 768-i_size.y, i_size.x, i_size.y),
+	Rect2(1024-i_size.x, 768-i_size.y, i_size.x, i_size.y)
+	]
 
 func _ready():
 	# set correct player count
@@ -53,8 +61,36 @@ func _ready():
 		
 		# initialize variables (gun type, sprite frame, etc.)
 		new_gun.initialize(i)
-	
 
+func _process(delta):
+	# Check if any player is behind an interface => if so, hide it
+	var hide_interface = [false, false, false, false]
+	
+	# Go through all players ...
+	for player in get_tree().get_nodes_in_group("Players"):
+		# Go through all interfaces ...
+		for i in range(4):
+			var occ = interface_occlusions[i]
+			
+			# CHeck if player position is within interface bounding box
+			if check_point_in_rect(occ, player.get_position() ):
+				hide_interface[i] = true
+			else:
+				hide_interface[i] = false
+	
+	# Once the results are in, go through all interfaces again and finally hide/show them
+	var counter = 0
+	for interface in get_tree().get_nodes_in_group("PlayerInterfaces"):
+		if hide_interface[counter]:
+			interface.modulate.a = 0.2
+		else:
+			interface.modulate.a = 1.0
+		counter += 1
+
+func check_point_in_rect(rect, point):
+	if point.x > rect.position.x and point.x < rect.position.x+rect.size.x and point.y > rect.position.y and point.y < rect.position.y+rect.size.y:
+		return true
+	return false
 
 func update_timer():
 	TIMER -= 1

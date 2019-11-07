@@ -6,6 +6,8 @@ var control_map = []
 var player_count = 0
 var player_colors = [Color(1,0.5,0.5), Color(0.5,0.5,1), Color(1,0.5,1), Color(0.5, 1, 1)]
 
+var level = 0
+
 func _ready():
 	# Register event to monitor if joystick connected or disconnected
 	Input.connect("joy_connection_changed",self,"joy_con_changed")
@@ -35,3 +37,9 @@ func register_device(device_num):
 		return player_count
 	else:
 		return -1
+
+func set_level(num):
+	level = num
+
+func get_level():
+	return level

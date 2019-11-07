@@ -46,11 +46,11 @@ shader_param/heightOffset = 0.5
 extents = Vector2( 5, 2.5 )
 
 [node name="Tree" type="StaticBody2D" groups=[
-"GrowingObjects",
 "OxygenGivers",
+"GrowingObjects",
 ]]
-collision_layer = 3
-collision_mask = 3
+collision_layer = 16
+collision_mask = 16
 script = ExtResource( 1 )
 
 [node name="Sprite" type="Sprite" parent="."]

@@ -99,7 +99,7 @@ func new_generation():
 		var true_position = get_safe_position( obj.get_position() )
 		var cell = last_known_grid[true_position.y][true_position.x]
 		
-		impulses.append( [true_position, -0.3, 0] )
+		impulses.append( [true_position, -0.15, 0] )
 		
 		# if it's ice, continue!
 		if cell.size() > 0 and cell[2] == null:
@@ -135,12 +135,12 @@ func new_generation():
 	for obj in get_tree().get_nodes_in_group("WarmthGivers"):
 		var true_position = get_safe_position( obj.get_position() )
 		
-		impulses.append( [true_position, 0.2, 1] )
+		impulses.append( [true_position, 0.125, 1] )
 	
 	for obj in get_tree().get_nodes_in_group("FireBolts"):
 		var true_position = get_safe_position( obj.get_position() )
 		
-		impulses.append( [true_position, 0.5, 1] )
+		impulses.append( [true_position, 0.75, 1] )
 		
 	
 	get_node("Semaphore").calculate_new_grid(impulses)
@@ -175,6 +175,10 @@ func update_texture(grid, MAP_SIZE, raining, freezed_blocks):
 				# Thicker = more carbon, less oxygen
 				# ??? Perhaps we need a background to show this properly, and perhaps only change alpha at extremes
 				# new_color.a = (1.0 - val[0])
+			else:
+				# otherwise, use the exact middle color?
+				new_color = Color(0.0, 0.0, 1.0).linear_interpolate(Color(1.0, 0.0, 0.0), 0.5)
+			
 			
 			texture.set_pixel(x, y, new_color)
 	

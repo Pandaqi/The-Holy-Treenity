@@ -18,8 +18,8 @@ func _ready():
 		# instantiate new button
 		var new_button = button_scene.instance()
 		
-		# set the right text
-		new_button.set_text(str(i))
+		# set the right text (add 1, because people expect it to start at level 1, not level 0)
+		new_button.set_text(str(i+1))
 		
 		# connect a signal
 		# (and give the button number as the argument)
@@ -74,7 +74,7 @@ func populate_input_map():
 	var motion_directions = [-1, -1, 1, 1]
 	
 	var keys = {
-		"keyboard1": [key_event(KEY_LEFT), key_event(KEY_UP), key_event(KEY_RIGHT), key_event(KEY_DOWN), key_event(KEY_SPACE), key_event(KEY_SHIFT)],
+		"keyboard1": [key_event(KEY_LEFT), key_event(KEY_UP), key_event(KEY_RIGHT), key_event(KEY_DOWN), key_event(KEY_B), key_event(KEY_N)],
 		"keyboard2": [key_event(KEY_A), key_event(KEY_W), key_event(KEY_D), key_event(KEY_S), key_event(KEY_T), key_event(KEY_Y)],
 		"controller": [JOY_AXIS_0, JOY_AXIS_1, JOY_AXIS_0, JOY_AXIS_1, JOY_BUTTON_0, JOY_BUTTON_1]
 	}
@@ -117,10 +117,12 @@ func populate_input_map():
 func button_pressed(num):
 	print("Pressed button ", num)
 	
-	get_tree().change_scene("res://Levels/LevelSkeleton.tscn")
+	# set the level globally
+	Global.set_level(num)
 	
-	# load the correct level
-	#get_tree().change_scene("res://Levels/Level" + str(num) + ".tscn")
+	# switch to the loading screen
+	# (the game is so small that this isn't really needed, but it's a nice place to explain controls and all)
+	get_tree().change_scene("res://LoadingScreen.tscn")
 
 func _on_Fullscreen_pressed():
 	OS.window_fullscreen = !OS.window_fullscreen

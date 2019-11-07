@@ -1,12 +1,19 @@
 # The-Holy-Treenity
 Game for the 20 Million Trees Game Jam
 
-Game Engine: Godot
-Assets/Scripts: All made by myself, for jam only
-Sound: 
+**Game Engine**: Godot
+
+**Assets/Scripts**: All made by myself, for jam only
+
+I used Affinity Designer for the graphics. (Some parts are rendered dynamically by Godot itself, but not much.)
+
+**Sound**: 
 
 Used Bxfr for the sound effects
-Free online tool used for making the background music: https://musiclab.chromeexperiments.com/Song-Maker/
+
+And this free online tool used for making the background music: https://musiclab.chromeexperiments.com/Song-Maker/
+
+The soundtrack is nothing more than a few of these loops that are randomly combined (sometimes there's multiple voices playing)
 
 Soundtrack link 1:
 https://musiclab.chromeexperiments.com/Song-Maker/song/6570147877748736

@@ -1,14 +1,19 @@
-[gd_scene load_steps=3 format=2]
+[gd_scene load_steps=4 format=2]
 
-[ext_resource path="res://Textures/Tiles/ground0.png" type="Texture" id=1]
+[ext_resource path="res://Textures/Tiles/tiles_spritesheet.png" type="Texture" id=1]
 
 [sub_resource type="RectangleShape2D" id=1]
 extents = Vector2( 16, 16 )
 
+[sub_resource type="ConvexPolygonShape2D" id=2]
+points = PoolVector2Array( -16, -16, 16, -16, -16, 16 )
+
 [node name="Node2D" type="Node2D"]
 
 [node name="BasicTile" type="Sprite" parent="."]
+editor/display_folded = true
 texture = ExtResource( 1 )
+hframes = 3
 region_rect = Rect2( 0, 0, 32, 32 )
 
 [node name="StaticBody" type="StaticBody2D" parent="BasicTile"]
@@ -17,3 +22,32 @@ collision_mask = 3
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="BasicTile/StaticBody"]
 shape = SubResource( 1 )
+
+[node name="MudTile" type="Sprite" parent="."]
+editor/display_folded = true
+position = Vector2( 64, 0 )
+texture = ExtResource( 1 )
+hframes = 3
+frame = 1
+region_rect = Rect2( 0, 0, 32, 32 )
+
+[node name="StaticBody" type="StaticBody2D" parent="MudTile"]
+collision_layer = 3
+collision_mask = 3
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="MudTile/StaticBody"]
+shape = SubResource( 1 )
+
+[node name="SlopeTile" type="Sprite" parent="."]
+position = Vector2( 128, 0 )
+texture = ExtResource( 1 )
+hframes = 3
+frame = 2
+region_rect = Rect2( 0, 0, 32, 32 )
+
+[node name="StaticBody" type="StaticBody2D" parent="SlopeTile"]
+collision_layer = 3
+collision_mask = 3
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="SlopeTile/StaticBody"]
+shape = SubResource( 2 )

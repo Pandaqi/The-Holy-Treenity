@@ -41,7 +41,7 @@ func damage(dh):
 		queue_free()
 
 func get_oxygen_level():
-	return 0.2
+	return 0.8
 
 func is_on_fire():
 	return on_fire
