@@ -21,8 +21,6 @@ var MinMass = 0.0001  # Ignore cells that are almost dry
 var MinFlow = 0.01 # ?? Every time we flow water, flow at least this value
 var MaxSpeed = 1.0 # ??
 
-var WaterFreezingPoint = 0.3 # heat value below which water is frozen
-
 var water_in_sky = 10.0 # start with a LOT of water
 var water_evaporated = 0.0
 var raining = false
@@ -31,8 +29,13 @@ var freezed_blocks = []
 
 var average_temp = 0.0
 
+var param = {}
+
 # The thread will start here.
 func _ready():
+	
+	# Grab simulation parameters from the main node
+	param = get_node("/root/Node2D").simulation_parameters
 	
 	MAP_SIZE = Global.MAP_SIZE
 	
@@ -55,7 +58,7 @@ func _ready():
 			#  Index 0 =  oxygen levels (the inverse is the carbon level)
 			#  Index 1 =  temperature levels
 			#  Index 2 =  water levels
-			grid[y][x] = [rand_range(0,1), rand_range(0,1), 0]
+			grid[y][x] = [rand_range(0.3,0.6), rand_range(0.3,0.6), 0]
 			
 			# Check if there is a block on this tile
 			if tilemap.get_cell(x, y) > -1:
@@ -124,7 +127,7 @@ func _thread_function(userdata):
 func manage_rain():
 	# Check if it should start raining
 	water_in_sky += water_evaporated
-	var rain_threshold = 10.0 * average_temp
+	var rain_threshold = param.rain_threshold_factor * average_temp
 
 	if not raining and water_in_sky > rain_threshold:
 		raining = true
@@ -184,7 +187,7 @@ func new_generation():
 			if cur_val[2] == null:
 				# try to unfreeze
 				# check if the heat is above the desired level
-				if cur_val[1] > WaterFreezingPoint * 1.0:
+				if cur_val[1] > param.water_melt_point:
 					# if so, reset to a full water block
 					grid[y][x][2] = 1.0
 			else:
@@ -194,7 +197,7 @@ func new_generation():
 				var ind_below = (y + 1) % int(MAP_SIZE.y)
 				if raining:
 					if old_grid[ind_below][x].size() == 0 or old_grid[ind_below][x][2] == null:
-						var water_drop_mass = 0.005
+						var water_drop_mass = param.raindrop_mass
 						
 						grid[y][x][2] += water_drop_mass
 						water_in_sky -= water_drop_mass
@@ -225,14 +228,14 @@ func new_generation():
 						if gas == 0 or gas == 1:
 							# get the  difference between cells => use that to slowly equalize values
 							# NOTE: we must make sure that we remove/add the same value on both sides
-							cur_val[gas] += 0.1 * (neighbour_val[gas] - old_val[gas]) * UPDATE_SPEED
+							cur_val[gas] += param.gas_exchange_rate * (neighbour_val[gas] - old_val[gas]) * UPDATE_SPEED
 						
 						# HOWEVER, heat is released if there's not enough carbon, and increased when there's too much carbon
 						# This is an asymmetric operation: we only remove/add something from the system
 						if gas == 1:
-							var heat_floor = 0.35
+							var heat_floor = param.heat_floor
 							var diff = (heat_floor - cur_val[0])
-							cur_val[1] += diff * 0.01 * UPDATE_SPEED
+							cur_val[1] += diff * param.heat_retention_rate * UPDATE_SPEED
 				
 				# clamp the value between 0 and 1
 				cur_val[gas] = clamp(cur_val[gas], 0.0, 1.0)
@@ -363,7 +366,7 @@ func new_generation():
 			
 			if not raining:
 				# Evaporate proportional to the heat
-				var water_to_evaporate = remaining_mass * heat * 0.02
+				var water_to_evaporate = remaining_mass * heat * param.water_evaporation_factor
 			
 				# Update current tile, global evaporation number, and remaining_mass
 				grid[y][x][2] -= water_to_evaporate
@@ -371,10 +374,10 @@ func new_generation():
 				remaining_mass -= water_to_evaporate
 			
 			# NOTE: We don't freeze small amounts of water, just looks ugly and complicates the algorithms
-			if remaining_mass <= 0.5: continue
+			if remaining_mass <= param.water_needed_for_freezing: continue
 
 			# If we're below freezing point ...
-			if heat < WaterFreezingPoint:
+			if heat < param.water_freeze_point:
 				# If we're on top of a static block (impenetrable or frozen)
 				if old_grid[ind_below][x].size() == 0 or old_grid[ind_below][x][2] == null:
 					# Set our (water) value to null

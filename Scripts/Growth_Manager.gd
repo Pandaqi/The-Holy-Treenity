@@ -5,6 +5,8 @@ var growth_timer
 onready var cellular_automata = get_node("/root/Node2D/CellularAutomata/Control/ColorRect")
 onready var tilemap = get_node("/root/Node2D/TileMap")
 
+var param = {}
+
 # Called when the node enters the scene tree for the first time.
 func _ready():
 	# Initialize timer
@@ -15,6 +17,8 @@ func _ready():
 	growth_timer.set_one_shot(false)
 	growth_timer.set_wait_time(0.5)
 	growth_timer.start()
+	
+	param = get_node("/root/Node2D").simulation_parameters
 
 func get_safe_position(pos):
 	var temp = tilemap.world_to_map( pos )
@@ -40,13 +44,10 @@ func grow():
 			if water_level == null:
 				water_level = 0.0
 		
-		var growth_speed = 1.05 + water_level * 0.35
-		
-		if growth_speed < 1.05:
-			print(water_level)
-			print("ERROR: Growth speed is less than 1.0??")
+		var growth_speed = param.tree_default_growth_speed + water_level * param.tree_water_growth_factor
 		
 		# if there's not enough carbon, we shrink again
+		# NOTE: Decided not to do this: it wasn't fun and made the game way too hard
 #		if my_cell.size() != 0:
 #			var carbon_level = (1.0 - my_cell[0])
 #

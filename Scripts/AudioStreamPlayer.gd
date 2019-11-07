@@ -1,4 +1,13 @@
 extends AudioStreamPlayer
+#
+#var audio_files = [
+#	preload("res://SoundTrack/loop_0.wav"),
+#	preload("res://SoundTrack/loop_1.wav"),
+#	preload("res://SoundTrack/loop_2.wav"),
+#	preload("res://SoundTrack/loop_3.wav"),
+#	preload("res://SoundTrack/loop_4.wav"),
+#	preload("res://SoundTrack/ticking_clock.wav")
+#	]
 
 # Called when the node enters the scene tree for the first time.
 func _ready():
@@ -8,7 +17,7 @@ func _ready():
 func pick_random_track():
 	var rand_num = randi() % 5
 	
-	return load("res://SoundTrack/loop_" + str(rand_num) + ".wav")
+	return load("res://Soundtrack/loop_" + str(rand_num) + ".wav")
 
 func _on_AudioStreamPlayer_finished():
 	# Play ticking clock music when nearing the end (loop is exactly 8 seconds, so use a multiple of 8)

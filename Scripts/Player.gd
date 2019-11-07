@@ -13,7 +13,7 @@ var MAX_SPEED = 250
 
 var PLAYER_SCALE = 0.75
 
-var last_known_movement = Vector2.ZERO
+var last_known_movement = Vector2(1,0)
 
 # Bullet scenes
 onready var log_bullet = preload("res://Bullets/Log.tscn")
@@ -32,12 +32,6 @@ var HEALTH = 1.0
 var OXYGEN = 1.0
 var HEAT = 0.5
 var THIRST = 1.0
-
-var OXYGEN_MINIMUM = 0.15
-var HEAT_MINIMUM = 0.15
-var HEAT_MAXIMUM = 0.85
-var THIRST_MINIMUM = 0.15
-
 var cur_water = 0.0
 
 # Player variables for its GUNS/BULLETS
@@ -46,6 +40,8 @@ var cur_weapon_obj = null
 
 var SAPLINGS = 0
 var AVAILABLE_WATER = 0.0
+
+export (int) var starting_saplings = 5
 
 var last_shot = 0.0
 var weapon_swap = false
@@ -61,10 +57,12 @@ var player_colors = [Color(1,0.5,0.5), Color(0.5,0.5,1), Color(1,0.5,1), Color(0
 
 var dead = false
 
+var param = {}
+
 
 func _ready():
 	# trick to automatically set our default saplings
-	update_saplings(10)
+	update_saplings(starting_saplings)
 
 	# move/save our interface
 	remove_child(my_interface)
@@ -107,6 +105,9 @@ func _ready():
 	# set frame + color for player label
 	get_node("PlayerLabel").frame = player_num
 	get_node("PlayerLabel").modulate = player_colors[player_num]
+	
+	# Grab simulation parameters from main node
+	param = get_node("/root/Node2D").simulation_parameters
 
 func set_controller(player_num, device_num):
 	self.control_num = device_num
@@ -246,12 +247,12 @@ func check_environment(delta, val):
 	# we're considered to be "drowning"
 	cur_water = val[2]
 	if cur_water == null: cur_water = 0.0
-	if cur_water >= 0.8:
+	if cur_water >= param.player_drown_level:
 		OXYGEN = 0.0
 	
 	cur_oxygen = OXYGEN
-	if cur_oxygen < OXYGEN_MINIMUM:
-		damage += (OXYGEN_MINIMUM - cur_oxygen) * 0.1 * delta
+	if cur_oxygen < param.player_oxygen_minimum:
+		damage += (param.player_oxygen_minimum - cur_oxygen) * 0.1 * delta
 		play_meter_anim("OxygenLevels", true)
 	else:
 		play_meter_anim("OxygenLevels", false)
@@ -265,10 +266,10 @@ func check_environment(delta, val):
 	
 	# Check if our current heat should damage us
 	var cur_heat = HEAT
-	if cur_heat < HEAT_MINIMUM:
+	if cur_heat < param.player_heat_minimum:
 		damage += 0.01 * delta
 		play_meter_anim("HeatLevels", true)
-	elif cur_heat > HEAT_MAXIMUM:
+	elif cur_heat > param.player_heat_maximum:
 		damage += 0.01 * delta
 		play_meter_anim("HeatLevels", true)
 	else:
@@ -284,7 +285,7 @@ func check_environment(delta, val):
 	
 	# But if we're standing in water, we automatically drink it, to balance it out
 	if cur_water > 0:
-		cur_thirst += (cur_water + 0.1) * delta
+		cur_thirst += (param.player_drink_factor*cur_water + 0.1) * delta
 		
 		# don't drink more than we need/can have!
 		if THIRST + cur_thirst > 1.0:
@@ -295,7 +296,7 @@ func check_environment(delta, val):
 	
 	update_thirst(cur_thirst)
 	
-	if THIRST < THIRST_MINIMUM:
+	if THIRST < param.player_water_minimum:
 		damage += 0.01 * delta
 		play_meter_anim("ThirstLevels", true)
 	else:
@@ -346,6 +347,12 @@ func update_health(dh):
 		# set this player to inactive
 		dead = true
 		
+		# remove ourselves from the player group
+		remove_from_group("Players")
+		
+		# play death sound effect
+		play_sound("death_sound")
+		
 		# throw out our weapon
 		equip_weapon(null)
 		
@@ -353,7 +360,7 @@ func update_health(dh):
 		get_node("AnimationPlayer").stop()
 		get_node("SpritesheetPlayer").play("Dying")
 		
-		# TO DO: Also play sound effect, and add particles??
+		# TO DO: Also add particles??
 
 func death_animation_done():
 	# inform the game that a player died
@@ -431,8 +438,10 @@ func _integrate_forces(state):
 		VELOCITY += Vector2(movement.x, 0)
 		if abs(VELOCITY.x) > MAX_SPEED:
 			VELOCITY.x = sign(VELOCITY.x) * MAX_SPEED
-			
-		last_known_movement = VELOCITY
+		
+		# Save our last known velocity, but only if we actually moved
+		if VELOCITY.length() > 0.1:
+			last_known_movement = VELOCITY
 		
 		# Hide the aiming arrow
 		aiming_arrow.set_visible(false)
@@ -447,7 +456,7 @@ func _integrate_forces(state):
 	
 	# If we are standing on SOMETHING ...
 	var standing_on_ice = false
-	if bodies_below_us.size() > 0:
+	if bodies_below_us.size() > 1:
 		# ... allow jumping
 		if Input.is_action_just_released( get_action("jump") ):
 			play_sound("jump")
@@ -457,9 +466,6 @@ func _integrate_forces(state):
 		for body in bodies_below_us:
 			if body == self:
 				continue
-			elif body.is_in_group("FreezedBlocks"):
-				standing_on_ice = true
-				break
 			
 			# if we haven't just swapped ...
 			# and we're standing on a player ...
@@ -469,6 +475,10 @@ func _integrate_forces(state):
 				if body.is_in_group("Players") and abs(VELOCITY.y) >= 0:
 					swap_weapons(body)
 					break
+			
+			# if the body is ice, well, remember we're standing on ice
+			elif body.is_in_group("FreezedBlocks"):
+				standing_on_ice = true
 	else:
 		weapon_swap = false
 	
@@ -571,6 +581,11 @@ func shoot(dir):
 	if dir == Vector2.ZERO:
 		dir = last_known_movement
 	
+	# if direction is still zero, return
+	if dir == Vector2.ZERO:
+		print("ERROR! Direction was zero!")
+		return
+	
 	# normalize the shooting dir
 	dir = dir.normalized()
 	
@@ -627,8 +642,8 @@ func shoot(dir):
 		# add impulse to sapling
 		new_bullet.apply_central_impulse(dir * impulse_speed)
 		
-		# update our sapling counter
-		update_water_gun(-1.0)
+		# update our water level
+		update_water_gun(-1.0 * param.water_gun_shoot_amount)
 	
 	###
 	# TREE/LOG BULLET
@@ -643,12 +658,8 @@ func shoot(dir):
 		new_bullet.transform.origin = transform.origin
 		
 		# position it just outside of our player rectangle
-		# TO DO: Make this better 
-		# => perhaps create collision exception with player, only for the first few seconds?
-		var tree_size = new_bullet.get_node("CollisionShape2D").shape.extents.x * 2
-		var player_size = 15
-		
-		new_bullet.set_position( get_position() + dir * (tree_size + player_size))
+		var player_size = 25
+		new_bullet.set_position( get_position() + dir * player_size)
 		
 		# add impulse to log
 		new_bullet.apply_central_impulse(dir * impulse_speed)

@@ -11,6 +11,8 @@ var FIRE_THRESHOLD = 0.6
 
 var saved_impulses = []
 
+var param = {}
+
 func _ready():
 	# Initialize timer
 	generation_timer = Timer.new()
@@ -27,6 +29,9 @@ func _ready():
 	
 	# Set some settings on the algorithm thread
 	get_node("Semaphore").UPDATE_SPEED = 0.2
+	
+	# Grab the simulation parameters from the main script
+	param = get_node("/root/Node2D").simulation_parameters
 
 func window_resize():
 	print("Resizing: ", get_viewport().size)
@@ -72,23 +77,23 @@ func new_generation():
 		# If this object is already on fire ...
 		if obj.is_on_fire():
 			# Expel carbon and heat
-			impulses.append( [true_position, -0.2, 0] )
-			impulses.append( [true_position, 0.2, 1] )
+			impulses.append( [true_position, param.fire_oxygen_taken, 0] )
+			impulses.append( [true_position, param.fire_heat_expelled, 1] )
 			
 			# Check if the fire should stop
 			#  => The heat has decreased enough, or there's loads of water here
 			if cell.size() > 0:
-				if cell[1] < FIRE_THRESHOLD*0.2 or cell[2] >= 0.6:
+				if cell[1] < param.fire_stop_heat or cell[2] >= param.fire_stop_water:
 					obj.extinguish_fire()
 			
 			# Damage the tree
-			obj.damage(-0.01)
+			obj.damage(param.fire_tree_damage)
 	
 		# If this object is NOT on fire ...
 		else:
 			if cell.size() > 0:
 				# Check if it's too hot, and there's no water to cool us
-				if cell[1] >= FIRE_THRESHOLD and cell[2] <= 0.2:
+				if cell[1] >= param.fire_start_heat and cell[2] <= param.fire_start_water:
 					# If so, start a fire!
 					obj.start_fire()
 					
@@ -99,7 +104,7 @@ func new_generation():
 		var true_position = get_safe_position( obj.get_position() )
 		var cell = last_known_grid[true_position.y][true_position.x]
 		
-		impulses.append( [true_position, -0.15, 0] )
+		impulses.append( [true_position, param.player_oxygen_taken, 0] )
 		
 		# if it's ice, continue!
 		if cell.size() > 0 and cell[2] == null:
@@ -109,7 +114,7 @@ func new_generation():
 		if obj.CUR_WEAPON == 1:
 			# grab some water for the gun
 			if cell.size() > 0 and cell[2] != null:
-				var val_exchanged = min(cell[2], 0.2)
+				var val_exchanged = min(cell[2], param.water_gun_suck_amount)
 				
 				# update player variable, and update grid of course
 				obj.update_water_gun( val_exchanged )
@@ -120,10 +125,10 @@ func new_generation():
 		
 		if bell_part.is_emitting():
 			# if we're already emitting, check if we should continue or not
-			if cell.size() == 0 or cell[2] < 0.75:
+			if cell.size() == 0 or cell[2] < param.player_drown_level:
 				bell_part.set_emitting(false)
 		else:
-			if cell.size() > 0 and cell[2] >= 0.75:
+			if cell.size() > 0 and cell[2] >= param.player_drown_level:
 				bell_part.restart()
 				bell_part.set_emitting(true)
 	
@@ -135,12 +140,12 @@ func new_generation():
 	for obj in get_tree().get_nodes_in_group("WarmthGivers"):
 		var true_position = get_safe_position( obj.get_position() )
 		
-		impulses.append( [true_position, 0.125, 1] )
+		impulses.append( [true_position, param.player_heat_expelled, 1] )
 	
 	for obj in get_tree().get_nodes_in_group("FireBolts"):
 		var true_position = get_safe_position( obj.get_position() )
 		
-		impulses.append( [true_position, 0.75, 1] )
+		impulses.append( [true_position, param.firebolt_heat_expelled, 1] )
 		
 	
 	get_node("Semaphore").calculate_new_grid(impulses)

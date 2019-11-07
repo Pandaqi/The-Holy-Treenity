@@ -6,7 +6,7 @@ var turned_static = false
 func _ready():
 	# create a unique collision shape for ourselves
 	var my_col_shape = RectangleShape2D.new()
-	my_col_shape.set_extents(Vector2(5, 2))
+	my_col_shape.set_extents(Vector2(4.5, 2))
 	$CollisionShape2D.shape = my_col_shape
 
 func _integrate_forces(state):
@@ -38,7 +38,7 @@ func _integrate_forces(state):
 	var old_scale = $CollisionShape2D.shape.get_extents()
 	var scale_speed = 1.075
 	if old_scale.x <= 32:
-		$Sprite.set_scale( $Sprite.get_scale() * scale_speed)
+		$Sprite.set_scale( $Sprite.get_scale() * scale_speed )
 		$CollisionShape2D.shape.set_extents(old_scale * scale_speed)
 	
 	._integrate_forces(state)

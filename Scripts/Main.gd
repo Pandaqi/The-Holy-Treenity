@@ -13,13 +13,70 @@ var players_alive = 1 # Is automatically set to number of players in the game
 export (PoolVector2Array) var player_positions = [Vector2(10,10), Vector2(10,10), Vector2(10,10), Vector2(10,10)]
 export (PoolVector2Array) var weapon_positions = [Vector2(16,7), Vector2(7,4), Vector2(16,7), Vector2(7,4), Vector2(29,15)]
 
-var i_size = Vector2(300, 300)
+var i_size = Vector2(300, 200)
 var interface_occlusions = [
 	Rect2(0,0, i_size.x, i_size.y),
 	Rect2(1024-i_size.x, 0, i_size.x, i_size.y),
 	Rect2(0, 768-i_size.y, i_size.x, i_size.y),
 	Rect2(1024-i_size.x, 768-i_size.y, i_size.x, i_size.y)
 	]
+
+###
+# SIMULATION VARIABLES
+#
+# All these variables are used (somewhere) in the environment simulation
+# I expose these to the editor, so I can quickly see and set all parameters, which makes balancing the game easier
+#
+###
+
+export (Dictionary) var simulation_parameters = {
+	# PLAYER
+	"player_oxygen_taken": 0.15,
+	"player_heat_expelled": 0.125,
+	"player_drink_factor": 1.0,
+	"player_drown_level": 0.75,
+	
+	"player_oxygen_minimum": 0.15,
+	"player_heat_minimum": 0.15,
+	"player_heat_maximum": 0.85,
+	"player_water_minimum": 0.15,
+	
+	# FIRES
+	"fire_oxygen_taken": -0.2,
+	"fire_heat_expelled": 0.2,
+	
+	"fire_start_heat": 0.6,
+	"fire_start_water": 0.4,
+	"fire_stop_heat": 0.6,
+	"fire_stop_water": 0.6,
+	
+	"fire_tree_damage": -0.01,
+	
+	# WATER GUN
+	"water_gun_suck_amount": 0.2,
+	"water_gun_shoot_amount": 1.0,
+	
+	# FIRE BOLTS
+	"firebolt_heat_expelled": 0.75,
+	
+	# TREES
+	"tree_oxygen_expelled": 0.8,
+	"tree_default_growth_speed": 1.05,
+	"tree_water_growth_factor": 0.35,
+	
+	# SIMULATION
+	"rain_threshold_factor": 10.0,
+	"raindrop_mass": 0.005,
+	
+	"water_evaporation_factor": 0.02,
+	"water_freeze_point": 0.3,
+	"water_melt_point": 0.3,
+	"water_needed_for_freezing": 0.5,
+	
+	"gas_exchange_rate": 0.1, # how quickly different heat/oxygen levels will try to equalize
+	"heat_floor": 0.35,    # oxygen levels above this release heat, below this they hold onto heat
+	"heat_retention_rate": 0.01, # how quickly heat is released/added (based on oxygen level alone)
+}
 
 func _ready():
 	# set correct player count
