@@ -1,0 +1,325 @@
+[gd_scene load_steps=11 format=2]
+
+[ext_resource path="res://Levels/LevelSkeleton.tscn" type="PackedScene" id=1]
+[ext_resource path="res://Textures/PackageHealthBar.png" type="Texture" id=2]
+[ext_resource path="res://Scripts/PressureSwitch.gd" type="Script" id=3]
+[ext_resource path="res://Bullets/LogStatic.tscn" type="PackedScene" id=4]
+[ext_resource path="res://Cow.tscn" type="PackedScene" id=5]
+[ext_resource path="res://Bullets/TreeStatic.tscn" type="PackedScene" id=6]
+[ext_resource path="res://Scripts/Tutorial.gd" type="Script" id=7]
+[ext_resource path="res://Interface/TinyDynamicFont.tres" type="DynamicFont" id=8]
+[ext_resource path="res://Textures/Interface/pointy_arrow.png" type="Texture" id=9]
+
+[sub_resource type="RectangleShape2D" id=1]
+extents = Vector2( 32, 8 )
+
+[node name="Node2D" index="0" instance=ExtResource( 1 )]
+player_positions = PoolVector2Array( 1, 1, 24, 2, 5, 20, 21, 17 )
+weapon_positions = PoolVector2Array( 14, 7, 6, 4, 27, 19, 25, 2, 4, 20 )
+simulation_parameters = {
+"fire_heat_expelled": 0.2,
+"fire_oxygen_taken": -0.2,
+"fire_start_heat": 0.6,
+"fire_start_water": 0.4,
+"fire_stop_heat": 0.3,
+"fire_stop_water": 0.6,
+"fire_tree_damage": -0.01,
+"firebolt_heat_expelled": 0.75,
+"gas_exchange_rate": 0.1,
+"heat_floor": 0.35,
+"heat_retention_rate": 0.01,
+"player_drink_factor": 1.0,
+"player_drown_level": 0.75,
+"player_heat_expelled": 0.125,
+"player_heat_maximum": 0.85,
+"player_heat_minimum": 0.15,
+"player_oxygen_minimum": 0.15,
+"player_oxygen_taken": -0.15,
+"player_water_minimum": 0.15,
+"rain_delay": 10,
+"rain_threshold_factor": 10.0,
+"raindrop_mass": 0.005,
+"tree_default_growth_speed": 1.05,
+"tree_max_seed_time": 50,
+"tree_min_seed_time": 20,
+"tree_oxygen_expelled": 0.8,
+"tree_seed_drop_amount": 3,
+"tree_water_growth_factor": 0.35,
+"water_evaporation_factor": 0.1,
+"water_freeze_point": 0.3,
+"water_gun_shoot_amount": 1.0,
+"water_gun_suck_amount": 0.2,
+"water_melt_point": 0.3,
+"water_needed_for_freezing": 0.5
+}
+
+[node name="TileMap" parent="." index="2"]
+tile_data = PoolIntArray( 0, 1, 0, 1, 1, 0, 2, 1, 0, 3, 1, 0, 4, 1, 0, 5, 1, 0, 6, 1, 0, 7, 1, 0, 8, 1, 0, 9, 1, 0, 10, 1, 0, 11, 1, 0, 14, 1, 0, 15, 1, 0, 16, 1, 0, 17, 1, 0, 20, 1, 0, 21, 1, 0, 22, 1, 0, 23, 1, 0, 24, 1, 0, 25, 1, 0, 26, 1, 0, 27, 1, 0, 28, 1, 0, 29, 1, 0, 30, 1, 0, 31, 1, 0, 65546, 1, 0, 65547, 1, 0, 65550, 1, 0, 65551, 1, 0, 65552, 1, 0, 65553, 1, 0, 65556, 1, 0, 65557, 1, 0, 131082, 1, 0, 131083, 1, 0, 131086, 1, 0, 131087, 1, 0, 131088, 1, 0, 131089, 1, 0, 131092, 1, 0, 131093, 1, 0, 196618, 1, 0, 196619, 1, 0, 196622, 1, 0, 196623, 1, 0, 196624, 1, 0, 196625, 1, 0, 196628, 1, 0, 196629, 1, 0, 262144, 0, 0, 262145, 0, 0, 262146, 0, 0, 262154, 1, 0, 262155, 1, 0, 262158, 1, 0, 262159, 1, 0, 262160, 1, 0, 262161, 1, 0, 262164, 1, 0, 262165, 1, 0, 262173, 0, 0, 262174, 0, 0, 262175, 0, 0, 327680, 1, 0, 327681, 1, 0, 327682, 1, 0, 327684, 0, 0, 327685, 0, 0, 327686, 0, 0, 327687, 0, 0, 327695, 1, 0, 327696, 1, 0, 327704, 0, 0, 327705, 0, 0, 327706, 0, 0, 327707, 0, 0, 327709, 1, 0, 327710, 1, 0, 327711, 1, 0, 393216, 1, 0, 393217, 1, 0, 393218, 1, 0, 393220, 1, 0, 393221, 1, 0, 393222, 1, 0, 393223, 1, 0, 393240, 1, 0, 393241, 1, 0, 393242, 1, 0, 393243, 1, 0, 393245, 1, 0, 393246, 1, 0, 393247, 1, 0, 458752, 1, 0, 458753, 1, 0, 458754, 1, 0, 458756, 1, 0, 458757, 1, 0, 458758, 1, 0, 458759, 1, 0, 458776, 1, 0, 458777, 1, 0, 458778, 1, 0, 458779, 1, 0, 458781, 1, 0, 458782, 1, 0, 458783, 1, 0, 524288, 1, 0, 524289, 1, 0, 524290, 1, 0, 524291, 0, 0, 524292, 1, 0, 524293, 1, 0, 524294, 1, 0, 524295, 1, 0, 524296, 0, 0, 524297, 0, 0, 524300, 0, 0, 524301, 0, 0, 524302, 0, 0, 524303, 0, 0, 524304, 0, 0, 524305, 0, 0, 524306, 0, 0, 524307, 0, 0, 524310, 0, 0, 524311, 0, 0, 524312, 1, 0, 524313, 1, 0, 524314, 1, 0, 524315, 1, 0, 524316, 0, 0, 524317, 1, 0, 524318, 1, 0, 524319, 1, 0, 589824, 1, 0, 589830, 1, 0, 589831, 1, 0, 589836, 1, 0, 589843, 1, 0, 589848, 1, 0, 589849, 1, 0, 589855, 1, 0, 655367, 1, 0, 655372, 1, 0, 655379, 1, 0, 655384, 1, 0, 851968, 0, 0, 851969, 0, 0, 851971, 0, 0, 851972, 0, 0, 851973, 0, 0, 851974, 0, 0, 851975, 0, 0, 851976, 0, 0, 851977, 0, 0, 851990, 0, 0, 851991, 0, 0, 851992, 0, 0, 851993, 0, 0, 851994, 0, 0, 851995, 0, 0, 851996, 0, 0, 851998, 0, 0, 851999, 0, 0, 917504, 1, 0, 917505, 1, 0, 917507, 1, 0, 917508, 1, 0, 917509, 1, 0, 917510, 1, 0, 917511, 1, 0, 917512, 1, 0, 917513, 1, 0, 917526, 1, 0, 917527, 1, 0, 917528, 1, 0, 917529, 1, 0, 917530, 1, 0, 917531, 1, 0, 917532, 1, 0, 917534, 1, 0, 917535, 1, 0, 983046, 1, 0, 983047, 1, 0, 983064, 1, 0, 983065, 1, 0, 1048576, 0, 0, 1048577, 0, 0, 1048579, 0, 0, 1048580, 0, 0, 1048582, 1, 0, 1048601, 1, 0, 1048603, 0, 0, 1048604, 0, 0, 1048606, 0, 0, 1048607, 0, 0, 1114112, 1, 0, 1114113, 1, 0, 1114115, 1, 0, 1114116, 1, 0, 1114139, 1, 0, 1114140, 1, 0, 1114142, 1, 0, 1114143, 1, 0, 1179648, 1, 0, 1179649, 1, 0, 1179651, 1, 0, 1179657, 0, 0, 1179658, 0, 0, 1179659, 0, 0, 1179668, 0, 0, 1179669, 0, 0, 1179670, 0, 0, 1179676, 1, 0, 1179678, 1, 0, 1179679, 1, 0, 1245184, 1, 0, 1245185, 1, 0, 1245192, 0, 0, 1245193, 1, 0, 1245194, 1, 0, 1245195, 1, 0, 1245198, 0, 0, 1245199, 0, 0, 1245200, 0, 0, 1245201, 0, 0, 1245204, 1, 0, 1245205, 1, 0, 1245206, 1, 0, 1245207, 0, 0, 1245214, 1, 0, 1245215, 1, 0, 1310726, 0, 0, 1310728, 1, 0, 1310729, 1, 0, 1310730, 1, 0, 1310731, 1, 0, 1310734, 1, 0, 1310735, 1, 0, 1310736, 1, 0, 1310737, 1, 0, 1310740, 1, 0, 1310741, 1, 0, 1310742, 1, 0, 1310743, 1, 0, 1310745, 0, 0, 1376260, 0, 0, 1376261, 0, 0, 1376262, 1, 0, 1376264, 1, 0, 1376265, 1, 0, 1376266, 1, 0, 1376267, 1, 0, 1376270, 1, 0, 1376271, 1, 0, 1376272, 1, 0, 1376273, 1, 0, 1376276, 1, 0, 1376277, 1, 0, 1376278, 1, 0, 1376279, 1, 0, 1376281, 1, 0, 1376282, 0, 0, 1376283, 0, 0, 1441794, 0, 0, 1441795, 0, 0, 1441796, 1, 0, 1441797, 1, 0, 1441798, 1, 0, 1441800, 1, 0, 1441801, 1, 0, 1441802, 1, 0, 1441803, 1, 0, 1441806, 1, 0, 1441807, 1, 0, 1441808, 1, 0, 1441809, 1, 0, 1441812, 1, 0, 1441813, 1, 0, 1441814, 1, 0, 1441815, 1, 0, 1441817, 1, 0, 1441818, 1, 0, 1441819, 1, 0, 1441820, 0, 0, 1441821, 0, 0, 1507328, 0, 0, 1507329, 0, 0, 1507330, 1, 0, 1507331, 1, 0, 1507332, 1, 0, 1507333, 1, 0, 1507334, 1, 0, 1507335, 0, 0, 1507336, 1, 0, 1507337, 1, 0, 1507338, 1, 0, 1507339, 1, 0, 1507342, 1, 0, 1507343, 1, 0, 1507344, 1, 0, 1507345, 1, 0, 1507348, 1, 0, 1507349, 1, 0, 1507350, 1, 0, 1507351, 1, 0, 1507352, 0, 0, 1507353, 1, 0, 1507354, 1, 0, 1507355, 1, 0, 1507356, 1, 0, 1507357, 1, 0, 1507358, 0, 0, 1507359, 0, 0 )
+
+[node name="EnvironmentObjects" type="Node2D" parent="." index="4"]
+
+[node name="PressureSwitch" type="Sprite" parent="EnvironmentObjects" index="0" groups=[
+"Switches",
+]]
+modulate = Color( 1, 0.447059, 0, 1 )
+position = Vector2( 96, 224 )
+texture = ExtResource( 2 )
+centered = false
+region_enabled = true
+region_rect = Rect2( 0, 0, 32, 32 )
+script = ExtResource( 3 )
+connected_door = NodePath("../Door")
+
+[node name="PressureSwitch2" type="Sprite" parent="EnvironmentObjects" index="1" groups=[
+"Switches",
+]]
+modulate = Color( 1, 0.447059, 1, 1 )
+position = Vector2( 896, 224 )
+texture = ExtResource( 2 )
+centered = false
+region_enabled = true
+region_rect = Rect2( 0, 0, 32, 32 )
+script = ExtResource( 3 )
+connected_door = NodePath("../Door2")
+SWITCH_TYPE = 1
+
+[node name="PressureSwitch3" type="Sprite" parent="EnvironmentObjects" index="2" groups=[
+"Switches",
+]]
+modulate = Color( 1, 0.447059, 1, 1 )
+position = Vector2( 224, 704 )
+texture = ExtResource( 2 )
+centered = false
+region_enabled = true
+region_rect = Rect2( 0, 0, 32, 32 )
+script = ExtResource( 3 )
+connected_door = NodePath("../Door3")
+SWITCH_TYPE = 1
+
+[node name="PressureSwitch4" type="Sprite" parent="EnvironmentObjects" index="3" groups=[
+"Switches",
+]]
+modulate = Color( 1, 0.447059, 0, 1 )
+position = Vector2( 768, 704 )
+texture = ExtResource( 2 )
+centered = false
+region_enabled = true
+region_rect = Rect2( 0, 0, 32, 32 )
+script = ExtResource( 3 )
+connected_door = NodePath("../Door4")
+
+[node name="Door" type="StaticBody2D" parent="EnvironmentObjects" index="4"]
+editor/display_folded = true
+position = Vector2( 352, 270 )
+collision_layer = 3
+collision_mask = 3
+
+[node name="Sprite" type="Sprite" parent="EnvironmentObjects/Door" index="0"]
+modulate = Color( 0.760784, 0.392157, 0.211765, 1 )
+texture = ExtResource( 2 )
+region_enabled = true
+region_rect = Rect2( 0, 0, 64, 16 )
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="EnvironmentObjects/Door" index="1"]
+shape = SubResource( 1 )
+
+[node name="Door2" type="StaticBody2D" parent="EnvironmentObjects" index="5"]
+editor/display_folded = true
+position = Vector2( 672, 270 )
+collision_layer = 3
+collision_mask = 3
+
+[node name="Sprite" type="Sprite" parent="EnvironmentObjects/Door2" index="0"]
+modulate = Color( 0.760784, 0.392157, 0.211765, 1 )
+texture = ExtResource( 2 )
+region_enabled = true
+region_rect = Rect2( 0, 0, 64, 16 )
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="EnvironmentObjects/Door2" index="1"]
+shape = SubResource( 1 )
+
+[node name="Door3" type="StaticBody2D" parent="EnvironmentObjects" index="6"]
+editor/display_folded = true
+position = Vector2( 416, 620 )
+collision_layer = 3
+collision_mask = 3
+
+[node name="Sprite" type="Sprite" parent="EnvironmentObjects/Door3" index="0"]
+modulate = Color( 0.760784, 0.392157, 0.211765, 1 )
+texture = ExtResource( 2 )
+region_enabled = true
+region_rect = Rect2( 0, 0, 64, 16 )
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="EnvironmentObjects/Door3" index="1"]
+shape = SubResource( 1 )
+
+[node name="Door4" type="StaticBody2D" parent="EnvironmentObjects" index="7"]
+editor/display_folded = true
+position = Vector2( 608, 620 )
+collision_layer = 3
+collision_mask = 3
+
+[node name="Sprite" type="Sprite" parent="EnvironmentObjects/Door4" index="0"]
+modulate = Color( 0.760784, 0.392157, 0.211765, 1 )
+texture = ExtResource( 2 )
+region_enabled = true
+region_rect = Rect2( 0, 0, 64, 16 )
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="EnvironmentObjects/Door4" index="1"]
+shape = SubResource( 1 )
+
+[node name="LogStatic" parent="EnvironmentObjects" index="8" instance=ExtResource( 4 )]
+position = Vector2( 336, 428 )
+
+[node name="LogStatic2" parent="EnvironmentObjects" index="9" instance=ExtResource( 4 )]
+position = Vector2( 368, 428 )
+
+[node name="LogStatic3" parent="EnvironmentObjects" index="10" instance=ExtResource( 4 )]
+position = Vector2( 400, 428 )
+
+[node name="LogStatic4" parent="EnvironmentObjects" index="11" instance=ExtResource( 4 )]
+position = Vector2( 432, 428 )
+
+[node name="LogStatic5" parent="EnvironmentObjects" index="12" instance=ExtResource( 4 )]
+position = Vector2( 464, 428 )
+
+[node name="LogStatic6" parent="EnvironmentObjects" index="13" instance=ExtResource( 4 )]
+position = Vector2( 496, 428 )
+
+[node name="LogStatic7" parent="EnvironmentObjects" index="14" instance=ExtResource( 4 )]
+position = Vector2( 528, 428 )
+
+[node name="LogStatic8" parent="EnvironmentObjects" index="15" instance=ExtResource( 4 )]
+position = Vector2( 560, 428 )
+
+[node name="LogStatic9" parent="EnvironmentObjects" index="16" instance=ExtResource( 4 )]
+position = Vector2( 592, 428 )
+
+[node name="LogStatic10" parent="EnvironmentObjects" index="17" instance=ExtResource( 4 )]
+position = Vector2( 624, 428 )
+
+[node name="LogStatic11" parent="EnvironmentObjects" index="18" instance=ExtResource( 4 )]
+position = Vector2( 656, 428 )
+
+[node name="LogStatic12" parent="EnvironmentObjects" index="19" instance=ExtResource( 4 )]
+position = Vector2( 688, 428 )
+
+[node name="Cow" parent="EnvironmentObjects" index="20" instance=ExtResource( 5 )]
+position = Vector2( 146.325, 390.371 )
+
+[node name="Cow2" parent="EnvironmentObjects" index="21" instance=ExtResource( 5 )]
+position = Vector2( 909.755, 390.371 )
+
+[node name="Cow3" parent="EnvironmentObjects" index="22" instance=ExtResource( 5 )]
+position = Vector2( 508.205, 232.084 )
+
+[node name="Cow4" parent="EnvironmentObjects" index="23" instance=ExtResource( 5 )]
+position = Vector2( 336.588, 548.659 )
+
+[node name="Cow5" parent="EnvironmentObjects" index="24" instance=ExtResource( 5 )]
+position = Vector2( 694.817, 543.66 )
+
+[node name="Tree" parent="EnvironmentObjects" index="25" instance=ExtResource( 6 )]
+position = Vector2( 38.3221, 389.887 )
+rotation = -1.5708
+
+[node name="Tree2" parent="EnvironmentObjects" index="26" instance=ExtResource( 6 )]
+position = Vector2( 200, 390 )
+rotation = -1.5708
+
+[node name="Tree5" parent="EnvironmentObjects" index="27" instance=ExtResource( 6 )]
+position = Vector2( 504.911, 588.276 )
+rotation = -1.5708
+
+[node name="Tree6" parent="EnvironmentObjects" index="28" instance=ExtResource( 6 )]
+position = Vector2( 534.903, 586.609 )
+rotation = -1.5708
+
+[node name="Tree3" parent="EnvironmentObjects" index="29" instance=ExtResource( 6 )]
+position = Vector2( 840, 390 )
+rotation = -1.5708
+
+[node name="Tree4" parent="EnvironmentObjects" index="30" instance=ExtResource( 6 )]
+position = Vector2( 1000, 390.371 )
+rotation = -1.5708
+
+[node name="Interface" parent="." index="6"]
+editor/display_folded = true
+
+[node name="Tutorial" type="CanvasLayer" parent="." index="7"]
+pause_mode = 2
+editor/display_folded = true
+script = ExtResource( 7 )
+
+[node name="Batch0" type="Node2D" parent="Tutorial" index="0"]
+visible = false
+
+[node name="PressureSwitch" type="Sprite" parent="Tutorial/Batch0" index="0"]
+editor/display_folded = true
+position = Vector2( 155.806, 182.88 )
+texture = ExtResource( 2 )
+centered = false
+region_enabled = true
+region_rect = Rect2( 0, 0, 200, 120 )
+
+[node name="Label" type="Label" parent="Tutorial/Batch0/PressureSwitch" index="0"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+custom_fonts/font = ExtResource( 8 )
+custom_colors/font_color = Color( 0, 0, 0, 1 )
+text = "This is a pressure switch. If enough water presses down on it, it opens a door"
+align = 1
+valign = 1
+autowrap = true
+
+[node name="Sprite" type="Sprite" parent="Tutorial/Batch0/PressureSwitch" index="1"]
+show_behind_parent = true
+position = Vector2( -4.30707, 57.065 )
+scale = Vector2( 0.25, 0.25 )
+texture = ExtResource( 9 )
+
+[node name="HeatSwitch" type="Sprite" parent="Tutorial/Batch0" index="1"]
+editor/display_folded = true
+position = Vector2( 675.516, 182.88 )
+texture = ExtResource( 2 )
+centered = false
+region_enabled = true
+region_rect = Rect2( 0, 0, 200, 120 )
+
+[node name="Label" type="Label" parent="Tutorial/Batch0/HeatSwitch" index="0"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+custom_fonts/font = ExtResource( 8 )
+custom_colors/font_color = Color( 0, 0, 0, 1 )
+text = "This is a heat switch. If the surroundings are hot enough, it opens a door"
+align = 1
+valign = 1
+autowrap = true
+
+[node name="Sprite" type="Sprite" parent="Tutorial/Batch0/HeatSwitch" index="1"]
+show_behind_parent = true
+position = Vector2( 204.332, 57.065 )
+rotation = 3.14159
+scale = Vector2( 0.25, 0.25 )
+texture = ExtResource( 9 )
+
+[node name="Instructions" type="Sprite" parent="Tutorial/Batch0" index="2"]
+editor/display_folded = true
+self_modulate = Color( 0.509804, 0.509804, 0.509804, 1 )
+position = Vector2( 389.467, 233.569 )
+texture = ExtResource( 2 )
+centered = false
+region_enabled = true
+region_rect = Rect2( 0, 0, 250, 25 )
+
+[node name="Label" type="Label" parent="Tutorial/Batch0/Instructions" index="0"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+custom_fonts/font = ExtResource( 8 )
+custom_colors/font_color = Color( 0.811765, 0.811765, 0.811765, 1 )
+text = "Press ENTER to continue"
+align = 1
+valign = 1
+
+[node name="PauseScreen" parent="." index="8"]
+editor/display_folded = false

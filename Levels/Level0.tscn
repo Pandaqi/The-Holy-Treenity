@@ -1,4 +1,4 @@
-[gd_scene load_steps=7 format=2]
+[gd_scene load_steps=8 format=2]
 
 [ext_resource path="res://Levels/LevelSkeleton.tscn" type="PackedScene" id=1]
 [ext_resource path="res://Scripts/Tutorial.gd" type="Script" id=2]
@@ -6,6 +6,7 @@
 [ext_resource path="res://Textures/PackageHealthBar.png" type="Texture" id=4]
 [ext_resource path="res://Interface/TinyDynamicFont.tres" type="DynamicFont" id=5]
 [ext_resource path="res://Textures/Interface/pointy_arrow.png" type="Texture" id=6]
+[ext_resource path="res://Bullets/TreeStatic.tscn" type="PackedScene" id=7]
 
 [node name="Node2D" index="0" instance=ExtResource( 1 )]
 player_positions = PoolVector2Array( 7, 15, 8, 15, 9, 15, 10, 15 )
@@ -52,6 +53,7 @@ tile_data = PoolIntArray( 0, 1, 0, 1, 1, 0, 2, 1, 0, 3, 1, 0, 4, 1, 0, 5, 1, 0, 
 
 [node name="Tutorial" type="CanvasLayer" parent="." index="6"]
 pause_mode = 2
+editor/display_folded = true
 script = ExtResource( 2 )
 
 [node name="ReferenceImage" type="Sprite" parent="Tutorial" index="0"]
@@ -269,3 +271,47 @@ valign = 1
 
 [node name="PauseScreen" parent="." index="7"]
 editor/display_folded = false
+
+[node name="Tree" parent="." index="11" instance=ExtResource( 7 )]
+position = Vector2( 80.0889, 512.634 )
+rotation = -1.5708
+
+[node name="Tree9" parent="." index="12" instance=ExtResource( 7 )]
+position = Vector2( 520, 129.752 )
+rotation = -1.5708
+
+[node name="Tree10" parent="." index="13" instance=ExtResource( 7 )]
+position = Vector2( 80, 70 )
+rotation = -1.5708
+
+[node name="Tree11" parent="." index="14" instance=ExtResource( 7 )]
+position = Vector2( 980, 70 )
+rotation = -1.5708
+
+[node name="Tree3" parent="." index="15" instance=ExtResource( 7 )]
+position = Vector2( 182.976, 612.355 )
+rotation = -1.5708
+
+[node name="Tree6" parent="." index="16" instance=ExtResource( 7 )]
+position = Vector2( 850.948, 612.355 )
+rotation = -1.5708
+
+[node name="Tree4" parent="." index="17" instance=ExtResource( 7 )]
+position = Vector2( 156.067, 612.355 )
+rotation = -1.5708
+
+[node name="Tree8" parent="." index="18" instance=ExtResource( 7 )]
+position = Vector2( 824.039, 612.355 )
+rotation = -1.5708
+
+[node name="Tree5" parent="." index="19" instance=ExtResource( 7 )]
+position = Vector2( 206.719, 612.355 )
+rotation = -1.5708
+
+[node name="Tree7" parent="." index="20" instance=ExtResource( 7 )]
+position = Vector2( 874.691, 612.355 )
+rotation = -1.5708
+
+[node name="Tree2" parent="." index="21" instance=ExtResource( 7 )]
+position = Vector2( 952.893, 512.634 )
+rotation = -1.5708

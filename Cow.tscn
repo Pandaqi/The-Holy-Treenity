@@ -1,0 +1,28 @@
+[gd_scene load_steps=5 format=2]
+
+[ext_resource path="res://Scripts/Cow.gd" type="Script" id=1]
+[ext_resource path="res://Textures/Characters/cow.png" type="Texture" id=2]
+
+[sub_resource type="PhysicsMaterial" id=1]
+friction = 0.01
+
+[sub_resource type="RectangleShape2D" id=2]
+extents = Vector2( 32, 25 )
+
+[node name="Cow" type="RigidBody2D" groups=[
+"OxygenTakers",
+"WarmthGivers",
+]]
+position = Vector2( 281.789, 481.731 )
+collision_layer = 3
+collision_mask = 3
+mode = 2
+physics_material_override = SubResource( 1 )
+script = ExtResource( 1 )
+
+[node name="Sprite" type="Sprite" parent="."]
+scale = Vector2( 0.5, 0.5 )
+texture = ExtResource( 2 )
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+shape = SubResource( 2 )

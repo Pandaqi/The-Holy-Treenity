@@ -1,0 +1,225 @@
+[gd_scene load_steps=6 format=2]
+
+[ext_resource path="res://Scripts/Tutorial.gd" type="Script" id=1]
+[ext_resource path="res://Textures/for_interface_proportions.png" type="Texture" id=2]
+[ext_resource path="res://Textures/PackageHealthBar.png" type="Texture" id=3]
+[ext_resource path="res://Interface/TinyDynamicFont.tres" type="DynamicFont" id=4]
+[ext_resource path="res://Textures/Interface/pointy_arrow.png" type="Texture" id=5]
+
+[node name="Tutorial" type="CanvasLayer"]
+pause_mode = 2
+editor/display_folded = true
+script = ExtResource( 1 )
+
+[node name="ReferenceImage" type="Sprite" parent="."]
+visible = false
+modulate = Color( 1, 1, 1, 0.392157 )
+scale = Vector2( 0.8, 0.8 )
+texture = ExtResource( 2 )
+centered = false
+
+[node name="Batch0" type="Node2D" parent="."]
+editor/display_folded = true
+visible = false
+
+[node name="Health" type="Sprite" parent="Batch0"]
+editor/display_folded = true
+position = Vector2( 322.421, 33.9667 )
+texture = ExtResource( 3 )
+centered = false
+region_enabled = true
+region_rect = Rect2( 0, 0, 200, 25 )
+
+[node name="Label" type="Label" parent="Batch0/Health"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+custom_fonts/font = ExtResource( 4 )
+custom_colors/font_color = Color( 0, 0, 0, 1 )
+text = "This is your health"
+align = 1
+valign = 1
+
+[node name="Sprite" type="Sprite" parent="Batch0/Health"]
+show_behind_parent = true
+position = Vector2( -2.98157, 11.5756 )
+scale = Vector2( 0.25, 0.25 )
+texture = ExtResource( 5 )
+
+[node name="Oxygen" type="Sprite" parent="Batch0"]
+editor/display_folded = true
+position = Vector2( 265.478, 71.0904 )
+texture = ExtResource( 3 )
+centered = false
+region_enabled = true
+region_rect = Rect2( 0, 0, 100, 25 )
+
+[node name="Label" type="Label" parent="Batch0/Oxygen"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+custom_fonts/font = ExtResource( 4 )
+custom_colors/font_color = Color( 0, 0, 0, 1 )
+text = "Oxygen"
+align = 1
+valign = 1
+
+[node name="Sprite" type="Sprite" parent="Batch0/Oxygen"]
+show_behind_parent = true
+position = Vector2( -3.3324, 13.3294 )
+scale = Vector2( 0.25, 0.25 )
+texture = ExtResource( 5 )
+
+[node name="Heat" type="Sprite" parent="Batch0"]
+editor/display_folded = true
+position = Vector2( 255.481, 97.2012 )
+texture = ExtResource( 3 )
+centered = false
+region_enabled = true
+region_rect = Rect2( 0, 0, 100, 25 )
+
+[node name="Label" type="Label" parent="Batch0/Heat"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+custom_fonts/font = ExtResource( 4 )
+custom_colors/font_color = Color( 0, 0, 0, 1 )
+text = "Heat"
+align = 1
+valign = 1
+
+[node name="Sprite" type="Sprite" parent="Batch0/Heat"]
+show_behind_parent = true
+position = Vector2( -3.3324, 13.3294 )
+scale = Vector2( 0.25, 0.25 )
+texture = ExtResource( 5 )
+
+[node name="Water" type="Sprite" parent="Batch0"]
+editor/display_folded = true
+position = Vector2( 244.149, 124.423 )
+texture = ExtResource( 3 )
+centered = false
+region_enabled = true
+region_rect = Rect2( 0, 0, 100, 25 )
+
+[node name="Label" type="Label" parent="Batch0/Water"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+custom_fonts/font = ExtResource( 4 )
+custom_colors/font_color = Color( 0, 0, 0, 1 )
+text = "Water"
+align = 1
+valign = 1
+
+[node name="Sprite" type="Sprite" parent="Batch0/Water"]
+show_behind_parent = true
+position = Vector2( -3.3324, 13.3294 )
+scale = Vector2( 0.25, 0.25 )
+texture = ExtResource( 5 )
+
+[node name="SaplingCounter" type="Sprite" parent="Batch0"]
+editor/display_folded = true
+position = Vector2( 13.8065, 184.055 )
+texture = ExtResource( 3 )
+centered = false
+region_enabled = true
+region_rect = Rect2( 0, 0, 150, 120 )
+
+[node name="Label" type="Label" parent="Batch0/SaplingCounter"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+custom_fonts/font = ExtResource( 4 )
+custom_colors/font_color = Color( 0, 0, 0, 1 )
+text = "How many seeds you have (required for planting trees)"
+align = 1
+valign = 1
+autowrap = true
+
+[node name="Sprite" type="Sprite" parent="Batch0/SaplingCounter"]
+show_behind_parent = true
+position = Vector2( 69.1611, -6.54773 )
+rotation = 1.5708
+scale = Vector2( 0.25, 0.25 )
+texture = ExtResource( 5 )
+
+[node name="General" type="Sprite" parent="Batch0"]
+self_modulate = Color( 1, 0.521569, 0.521569, 1 )
+position = Vector2( 381.353, 317.535 )
+texture = ExtResource( 3 )
+centered = false
+region_enabled = true
+region_rect = Rect2( 0, 0, 300, 150 )
+
+[node name="Label" type="Label" parent="Batch0/General"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+custom_fonts/font = ExtResource( 4 )
+custom_colors/font_color = Color( 0.137255, 0, 0, 1 )
+text = "Objective: survive. 
+Oxygen too low = suffocation
+Heat too low = freeze to death
+Heat too high = also bad
+Not enough water = very bad"
+align = 1
+valign = 1
+autowrap = true
+
+[node name="Instructions" type="Sprite" parent="Batch0"]
+editor/display_folded = true
+self_modulate = Color( 0.509804, 0.509804, 0.509804, 1 )
+position = Vector2( 405.53, 481.249 )
+texture = ExtResource( 3 )
+centered = false
+region_enabled = true
+region_rect = Rect2( 0, 0, 250, 25 )
+
+[node name="Label" type="Label" parent="Batch0/Instructions"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+custom_fonts/font = ExtResource( 4 )
+custom_colors/font_color = Color( 0.811765, 0.811765, 0.811765, 1 )
+text = "Press ENTER to continue"
+align = 1
+valign = 1
+
+[node name="Batch1" type="Node2D" parent="."]
+visible = false
+
+[node name="Weapons" type="Sprite" parent="Batch1"]
+editor/display_folded = true
+position = Vector2( 565.707, 232.409 )
+texture = ExtResource( 3 )
+centered = false
+region_enabled = true
+region_rect = Rect2( 0, 0, 200, 120 )
+
+[node name="Label" type="Label" parent="Batch1/Weapons"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+custom_fonts/font = ExtResource( 4 )
+custom_colors/font_color = Color( 0, 0, 0, 1 )
+text = "Pick up \"weapons\" by walking past them. This one shoots seeds - try the others for yourself!"
+align = 1
+valign = 1
+autowrap = true
+
+[node name="Sprite" type="Sprite" parent="Batch1/Weapons"]
+show_behind_parent = true
+position = Vector2( -1.75049, 58.4292 )
+scale = Vector2( 0.25, 0.25 )
+texture = ExtResource( 5 )
+
+[node name="Instructions2" type="Sprite" parent="Batch1"]
+editor/display_folded = true
+self_modulate = Color( 0.509804, 0.509804, 0.509804, 1 )
+position = Vector2( 544.61, 365.554 )
+texture = ExtResource( 3 )
+centered = false
+region_enabled = true
+region_rect = Rect2( 0, 0, 250, 25 )
+
+[node name="Label" type="Label" parent="Batch1/Instructions2"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+custom_fonts/font = ExtResource( 4 )
+custom_colors/font_color = Color( 0.811765, 0.811765, 0.811765, 1 )
+text = "Press ENTER to continue"
+align = 1
+valign = 1

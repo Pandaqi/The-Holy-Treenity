@@ -106,31 +106,23 @@ func new_generation():
 		
 		impulses.append( [true_position, param.player_oxygen_taken, 0] )
 		
-		# if it's ice, continue!
-		if cell.size() > 0 and cell[2] == null:
-			continue
-		
-		# if we're holding the water gun ...
-		if obj.CUR_WEAPON == 1:
-			# grab some water for the gun
-			if cell.size() > 0 and cell[2] != null:
-				var val_exchanged = min(cell[2], param.water_gun_suck_amount)
-				
-				# update player variable, and update grid of course
-				obj.update_water_gun( val_exchanged )
-				impulses.append( [true_position, -val_exchanged, 2] )
-		
-		# if an oxygen taker is under water, it should have a particle effect with bells popping up!
-		var bell_part =  obj.get_node("BellParticles")
-		
-		if bell_part.is_emitting():
-			# if we're already emitting, check if we should continue or not
-			if cell.size() == 0 or cell[2] < param.player_drown_level:
-				bell_part.set_emitting(false)
-		else:
-			if cell.size() > 0 and cell[2] >= param.player_drown_level:
-				bell_part.restart()
-				bell_part.set_emitting(true)
+		# If it's a player, perform some more checks
+		if obj.is_in_group("Players"):
+			# if it's ice, continue!
+			if cell.size() > 0 and cell[2] == null:
+				continue
+			
+			# if an oxygen taker is under water, it should have a particle effect with bells popping up!
+			var bell_part =  obj.get_node("BellParticles")
+			
+			if bell_part.is_emitting():
+				# if we're already emitting, check if we should continue or not
+				if cell.size() == 0 or cell[2] < param.player_drown_level:
+					bell_part.set_emitting(false)
+			else:
+				if cell.size() > 0 and cell[2] >= param.player_drown_level:
+					bell_part.restart()
+					bell_part.set_emitting(true)
 	
 	###
 	# Giving/taking heat
@@ -154,6 +146,12 @@ func new_generation():
 		var true_position = get_safe_position( obj.get_position() )
 		
 		impulses.append( [true_position, null, true] )
+	
+	###
+	# Switches must check their surroundings
+	###
+	for obj in get_tree().get_nodes_in_group("Switches"):
+		obj.check_surroundings()
 		
 	
 	get_node("Semaphore").calculate_new_grid(impulses)

@@ -300,9 +300,6 @@ func new_generation():
 			if remaining_mass < 0:
 				print("Mass < 0??? ", x, " || ", y)
 	
-			if remaining_mass == null:
-				print("Mass is null??? ", x, " || ", y)
-	
 			# if we don't have water, continue!
 			if remaining_mass <= 0: continue
 	
@@ -393,6 +390,9 @@ func new_generation():
 			if not raining:
 				# Evaporate proportional to the heat
 				var water_to_evaporate = remaining_mass * heat * param.water_evaporation_factor
+				
+				# clamp value, so we don't evaporate more than we have
+				water_to_evaporate = clamp(water_to_evaporate, 0.0, remaining_mass)
 			
 				# Update current tile, global evaporation number, and remaining_mass
 				grid[y][x][2] -= water_to_evaporate

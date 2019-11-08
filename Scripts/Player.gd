@@ -39,7 +39,6 @@ var CUR_WEAPON = -1
 var cur_weapon_obj = null
 
 var SAPLINGS = 0
-var AVAILABLE_WATER = 0.0
 
 export (int) var starting_saplings = 5
 
@@ -281,11 +280,11 @@ func check_environment(delta, val):
 	var cur_thirst = 0
 	
 	# We "lose" a little water every frame
-	cur_thirst -= 0.1 * delta
+	cur_thirst -= 0.01 * delta
 	
 	# But if we're standing in water, we automatically drink it, to balance it out
-	if cur_water > 0:
-		cur_thirst += (param.player_drink_factor*cur_water + 0.1) * delta
+	if cur_water > 0.15:
+		cur_thirst += (param.player_drink_factor*cur_water + 0.01) * delta
 		
 		# don't drink more than we need/can have!
 		if THIRST + cur_thirst > 1.0:
@@ -316,12 +315,6 @@ func check_environment(delta, val):
 	###
 	resize_meter("OxygenLevels", OXYGEN) # update oxygen meter
 	resize_meter("HeatLevels", HEAT) # update heat meter
-
-func update_water_gun(dw):
-	AVAILABLE_WATER += dw
-	
-	if AVAILABLE_WATER < 0:
-		AVAILABLE_WATER = 0
 
 func update_saplings(ds):
 	SAPLINGS += ds
@@ -627,9 +620,6 @@ func shoot(dir):
 	# WATER GUN
 	###
 	elif CUR_WEAPON == 1:
-		if AVAILABLE_WATER <= 0:
-			return
-		
 		new_bullet = water_bullet.instance()
 		
 		new_bullet.transform[0] = dir
@@ -640,9 +630,6 @@ func shoot(dir):
 		
 		# add impulse to sapling
 		new_bullet.apply_central_impulse(dir * impulse_speed)
-		
-		# update our water level
-		update_water_gun(-1.0 * param.water_gun_shoot_amount)
 	
 	###
 	# TREE/LOG BULLET

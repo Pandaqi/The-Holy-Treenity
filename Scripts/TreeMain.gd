@@ -82,4 +82,7 @@ func extinguish_fire():
 	fire_effect.queue_free()
 	fire_effect = null
 	
+	# reset damage => just a bit nicer to the player
+	HEALTH = 1.0
+	
 	on_fire = false
