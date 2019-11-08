@@ -64,11 +64,16 @@ export (Dictionary) var simulation_parameters = {
 	"tree_default_growth_speed": 1.05,
 	"tree_water_growth_factor": 0.35,
 	
-	# SIMULATION
-	"rain_threshold_factor": 10.0,
-	"raindrop_mass": 0.005,
+	"tree_seed_drop_amount": 3, # how many seeds a tree drops IF CHOPPED
+	"tree_min_seed_time": 20, # minimum amount of time between trees dropping seeds
+	"tree_max_seed_time": 50, # maximum amount of time between trees droppin seeds
 	
-	"water_evaporation_factor": 0.02,
+	# SIMULATION
+	"rain_threshold_factor": 20.0,
+	"raindrop_mass": 0.005,
+	"rain_delay": 10,
+	
+	"water_evaporation_factor": 10.0,
 	"water_freeze_point": 0.3,
 	"water_melt_point": 0.3,
 	"water_needed_for_freezing": 0.5,
@@ -119,6 +124,10 @@ func _ready():
 		
 		# initialize variables (gun type, sprite frame, etc.)
 		new_gun.initialize(i)
+	
+	# now start the tutorial
+	if has_node("Tutorial"):
+		get_node("Tutorial").start_tutorial()
 
 func _process(delta):
 	# Check if any player is behind an interface => if so, hide it
@@ -174,6 +183,7 @@ func player_died():
 
 func end_game(did_we_win):
 	$PauseScreen/Control.set_visible(true)
+	$PauseScreen/Control.game_over = true
 	$CellularAutomata/Control/ColorRect/Semaphore.exit_thread = true
 	
 	get_tree().paused = true

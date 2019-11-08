@@ -15,10 +15,9 @@ func _draw():
 			var val = grid[y][x][2]
 			var ice_block = false
 			
-			# if it's an ice block, set value to 1
+			# if it's an ice block, do nothing
 			if val == null: 
-				val = 1
-				ice_block = true
+				continue
 			
 			# floating point precision errors => better give ourselves some margin
 			elif val <= 0:
@@ -32,20 +31,15 @@ func _draw():
 			var col = Color(0.5, 0.5, 1, 0.5)
 			var height = min(val, 1.0) * 32
 			var waterfall_drawn = false
+
+			# Check if block above has water, if so, always set to full water
+			var val_above = grid[ int(y - 1) % int(MAP_SIZE.y) ][x]
 			
-			# Ice tile => opaque white color, fixed full height
-			if ice_block:
-				col = Color(1.0, 1.0, 1.0, 1.0)
-				height = 32
-			else:
-				# Check if block above has water, if so, always set to full water
-				var val_above = grid[ int(y - 1) % int(MAP_SIZE.y) ][x]
-				
-				if val_above.size() > 0 and val_above[2] != null:
-					if val_above[2] > 0:
-						height = 32
-						col = Color(0.5, 0.5, 1, 0.2)
-						waterfall_drawn = true
+			if val_above.size() > 0 and val_above[2] != null:
+				if val_above[2] > 0:
+					height = 32
+					col = Color(0.5, 0.5, 1, 0.2)
+					waterfall_drawn = true
 
 			# TO DO: Use pressure => if a cell has a value higher than 8.0, we push water upwards
 			

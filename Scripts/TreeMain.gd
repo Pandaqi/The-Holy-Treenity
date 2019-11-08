@@ -7,8 +7,14 @@ var fire_effect = null
 var sapling_scene = preload("res://Bullets/SaplingStatic.tscn")
 var sapling_timer = null
 var time_between_saplings = Vector2(20.0, 50.0)
+var param = {}
 
 var HEALTH = 1.0
+
+func _ready():
+	# set some parameters, grabbing the parameter object from the main node
+	param = get_node("/root/Node2D").simulation_parameters
+	time_between_saplings = Vector2(param.tree_min_seed_time, param.tree_max_seed_time)
 
 func drop_sapling():
 	# drop actual sapling (which you can pick up with the player)
@@ -38,20 +44,28 @@ func damage(dh, good_damage = false):
 		
 		if good_damage:
 			# if we died by chopping ("good damage"), drop saplings!
-			var rand_num = randi() % 3 + 1
+			var rand_num = randi() % param.tree_seed_drop_amount + 1
 			for i in range(rand_num):
 				drop_sapling()
 		
+		optional_death_calls()
+		
 		queue_free()
 
+func optional_death_calls():
+	pass
+
 func get_oxygen_level():
-	return get_node("/root/Node2D").simulation_parameters.tree_oxygen_expelled
+	return param.tree_oxygen_expelled
 
 func is_on_fire():
 	return on_fire
 
 func get_transformed_position():
-	return ( get_position() + get_transform().x * get_node("Sprite").get_scale().x * 32 )
+	return ( get_position() + transform[0] * get_node("Sprite").get_scale().x * 32 )
+
+func get_fire_position():
+	return Vector2(get_node("Sprite").get_scale().x * 32, 0)
 
 func start_fire():
 	# if we're already on fire, don't start a new one
@@ -59,8 +73,8 @@ func start_fire():
 		return
 	
 	fire_effect = fire_scene.instance()
-	fire_effect.set_position( get_transformed_position() )
-	get_node("/root/Node2D").add_child(fire_effect)
+	fire_effect.set_position( get_fire_position() )
+	add_child(fire_effect)
 	
 	on_fire = true
 

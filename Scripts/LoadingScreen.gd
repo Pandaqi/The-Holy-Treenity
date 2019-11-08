@@ -30,6 +30,6 @@ func load_level():
 	var level_num = Global.get_level()
 	
 	# TO DO: Remove this once I have proper levels
-	get_tree().change_scene("res://Levels/LevelSkeleton.tscn")
+	#get_tree().change_scene("res://Levels/LevelSkeleton.tscn")
 	
-	#get_tree().change_scene("res://Levels/Level" + str(level_num) + ".tscn")
+	get_tree().change_scene("res://Levels/Level" + str(level_num) + ".tscn")

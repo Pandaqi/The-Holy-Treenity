@@ -1,9 +1,11 @@
 extends Control
 
+var game_over = false
+
 # Listen for user input (restart level or return to main menu?)
 func _input(ev):
-	# If the game isn't paused, there is no pause screen, so don't do anything!
-	if not get_tree().paused:
+	# If the game isn't over, there is no pause screen, so don't do anything!
+	if not game_over:
 		return
 	
 	# If we press ENTER, restart the level

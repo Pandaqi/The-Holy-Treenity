@@ -4,9 +4,11 @@
 [ext_resource path="res://Textures/Trees/log.png" type="Texture" id=2]
 
 [sub_resource type="RectangleShape2D" id=1]
+extents = Vector2( 30.7893, 12.7114 )
 
-[node name="StaticBody2D" type="StaticBody2D" groups=[
+[node name="LogStatic" type="StaticBody2D" groups=[
 "OxygenGivers",
+"Logs",
 ]]
 collision_layer = 3
 collision_mask = 3

@@ -146,6 +146,14 @@ func new_generation():
 		var true_position = get_safe_position( obj.get_position() )
 		
 		impulses.append( [true_position, param.firebolt_heat_expelled, 1] )
+	
+	###
+	# Logs (temporarily) block the flow at their location
+	###
+	for obj in get_tree().get_nodes_in_group("Logs"):
+		var true_position = get_safe_position( obj.get_position() )
+		
+		impulses.append( [true_position, null, true] )
 		
 	
 	get_node("Semaphore").calculate_new_grid(impulses)
@@ -204,7 +212,7 @@ func update_texture(grid, MAP_SIZE, raining, freezed_blocks):
 	###
 	
 	# Start/stop the rain particle
-	get_node("/root/Node2D/Rain_Particles").set_emitting(raining)
+	get_node("/root/Node2D/WeatherLayer/Rain_Particles").set_emitting(raining)
 	
 	# Also ask the water node to draw the water
 	get_node("/root/Node2D/WeatherLayer/DrawWater").draw_water(grid, MAP_SIZE)
@@ -226,6 +234,7 @@ func update_texture(grid, MAP_SIZE, raining, freezed_blocks):
 		get_node("/root/Node2D").add_child(new_block)
 	
 	# OLD METHOD (without shader, using Sprite node)
+	# Also works, just worse performance and less flexibility
 	# Add texture to the sprite
 #	var sprite = get_node("Sprite")
 #	sprite.set_texture(image_tex)

@@ -21,9 +21,9 @@ var MinMass = 0.0001  # Ignore cells that are almost dry
 var MinFlow = 0.01 # ?? Every time we flow water, flow at least this value
 var MaxSpeed = 1.0 # ??
 
-var water_in_sky = 10.0 # start with a LOT of water
+var water_in_sky = 0.0
 var water_evaporated = 0.0
-var raining = false
+var raining = true
 
 var freezed_blocks = []
 
@@ -36,6 +36,8 @@ func _ready():
 	
 	# Grab simulation parameters from the main node
 	param = get_node("/root/Node2D").simulation_parameters
+	
+	water_in_sky = param.rain_threshold_factor * 0.6 # always start with rain
 	
 	MAP_SIZE = Global.MAP_SIZE
 	
@@ -129,11 +131,18 @@ func manage_rain():
 	water_in_sky += water_evaporated
 	var rain_threshold = param.rain_threshold_factor * average_temp
 
-	if not raining and water_in_sky > rain_threshold:
-		raining = true
-	elif raining and water_in_sky < 0.0:
-		water_in_sky = 0.0
-		raining = false
+	# If it's not raining ...
+	if not raining:
+		# But there's enough water in the sky for rain, AND we win the lottery
+		# (Thread updates 5 times per second, so 2% chance per frame, means there's an average delay of 10 seconds)
+		print(water_in_sky, " || Threshold: ", rain_threshold)
+		
+		if water_in_sky > rain_threshold and rand_range(0,1) <= UPDATE_SPEED * (1.0/param.rain_delay):
+			raining = true
+	elif raining:
+		if water_in_sky < 0.0:
+			water_in_sky = 0.0
+			raining = false
 
 func calculate_new_grid(impulses):
 	# Do something with changes given to us
@@ -143,13 +152,30 @@ func calculate_new_grid(impulses):
 	# For each impulse, set pressure to 1.0
 	for imp in impulses:
 		var cell = imp[0] # get the cell we should update
-		var change = imp[1] * UPDATE_SPEED # get the impulse, multiply it by the rate at which the automata is updated
-		var gas_type = imp[2] # get the gas type to update
-		
 		var cur_val = grid[cell.y][cell.x]
 		
-		if cur_val.size() > 0 and (gas_type != 2 or cur_val[2] != null):
-			grid[cell.y][cell.x][gas_type] = clamp(cur_val[gas_type] + change, gas_bounds[gas_type].x, gas_bounds[gas_type].y)
+		# if the second parameter is null, this is a BLOCKING impulse
+		if imp[1] == null:
+			# don't influence ice blocks with logs
+			if cur_val.size() > 0 and cur_val[2] == null:
+				continue
+			
+			# if third parameter is true, completely nullify this cell
+			if imp[2]:
+				grid[cell.y][cell.x] = []
+			
+			# if third parameter is false, RELEASE this cell (with average parameters)
+			else:
+				grid[cell.y][cell.x] = [0.5, 0.5, 0]
+		
+		# OTHERWISE, it's just a regular impulse update
+		else:
+			var change = imp[1] * UPDATE_SPEED # get the impulse, multiply it by the rate at which the automata is updated
+			var gas_type = imp[2] # get the gas type to update
+
+			
+			if cur_val.size() > 0 and (gas_type != 2 or cur_val[2] != null):
+				grid[cell.y][cell.x][gas_type] = clamp(cur_val[gas_type] + change, gas_bounds[gas_type].x, gas_bounds[gas_type].y)
 	
 	semaphore.post() # tell thread to update
 

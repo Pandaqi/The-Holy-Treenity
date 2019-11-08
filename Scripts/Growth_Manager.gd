@@ -46,6 +46,10 @@ func grow():
 		
 		var growth_speed = param.tree_default_growth_speed + water_level * param.tree_water_growth_factor
 		
+		# if the object is on fire, keep updating the position of the fire particle
+		if obj.is_on_fire():
+			obj.fire_effect.set_position( obj.get_fire_position() )
+		
 		# if there's not enough carbon, we shrink again
 		# NOTE: Decided not to do this: it wasn't fun and made the game way too hard
 #		if my_cell.size() != 0:

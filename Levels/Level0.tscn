@@ -1,0 +1,271 @@
+[gd_scene load_steps=7 format=2]
+
+[ext_resource path="res://Levels/LevelSkeleton.tscn" type="PackedScene" id=1]
+[ext_resource path="res://Scripts/Tutorial.gd" type="Script" id=2]
+[ext_resource path="res://Textures/for_interface_proportions.png" type="Texture" id=3]
+[ext_resource path="res://Textures/PackageHealthBar.png" type="Texture" id=4]
+[ext_resource path="res://Interface/TinyDynamicFont.tres" type="DynamicFont" id=5]
+[ext_resource path="res://Textures/Interface/pointy_arrow.png" type="Texture" id=6]
+
+[node name="Node2D" index="0" instance=ExtResource( 1 )]
+player_positions = PoolVector2Array( 7, 15, 8, 15, 9, 15, 10, 15 )
+weapon_positions = PoolVector2Array( 16, 9, 7, 4, 19, 7, 29, 2, 29, 15 )
+simulation_parameters = {
+"fire_heat_expelled": 0.2,
+"fire_oxygen_taken": -0.2,
+"fire_start_heat": 0.6,
+"fire_start_water": 0.4,
+"fire_stop_heat": 0.3,
+"fire_stop_water": 0.6,
+"fire_tree_damage": -0.01,
+"firebolt_heat_expelled": 0.75,
+"gas_exchange_rate": 0.1,
+"heat_floor": 0.35,
+"heat_retention_rate": 0.01,
+"player_drink_factor": 1.0,
+"player_drown_level": 0.75,
+"player_heat_expelled": 0.125,
+"player_heat_maximum": 0.85,
+"player_heat_minimum": 0.15,
+"player_oxygen_minimum": 0.15,
+"player_oxygen_taken": -0.15,
+"player_water_minimum": 0.15,
+"rain_delay": 10.0,
+"rain_threshold_factor": 10.0,
+"raindrop_mass": 0.005,
+"tree_default_growth_speed": 1.05,
+"tree_max_seed_time": 50,
+"tree_min_seed_time": 20,
+"tree_oxygen_expelled": 1.0,
+"tree_seed_drop_amount": 3,
+"tree_water_growth_factor": 0.35,
+"water_evaporation_factor": 0.02,
+"water_freeze_point": 0.3,
+"water_gun_shoot_amount": 1.0,
+"water_gun_suck_amount": 0.2,
+"water_melt_point": 0.3,
+"water_needed_for_freezing": 0.5
+}
+
+[node name="TileMap" parent="." index="2"]
+tile_data = PoolIntArray( 0, 1, 0, 1, 1, 0, 2, 1, 0, 3, 1, 0, 4, 1, 0, 5, 1, 0, 6, 1, 0, 7, 1, 0, 8, 1, 0, 9, 1, 0, 10, 1, 0, 11, 1, 0, 12, 1, 0, 13, 1, 0, 18, 1, 0, 19, 1, 0, 20, 1, 0, 21, 1, 0, 22, 1, 0, 23, 1, 0, 24, 1, 0, 25, 1, 0, 26, 1, 0, 27, 1, 0, 28, 1, 0, 29, 1, 0, 30, 1, 0, 31, 1, 0, 65543, 1, 0, 65544, 1, 0, 65545, 1, 0, 65546, 1, 0, 65557, 1, 0, 65558, 1, 0, 65559, 1, 0, 65560, 1, 0, 131079, 1, 0, 131096, 1, 0, 196608, 0, 0, 196609, 0, 0, 196610, 0, 0, 196611, 2, 0, 196636, 536870914, 0, 196637, 0, 0, 196638, 0, 0, 196639, 0, 0, 262144, 1, 0, 262145, 1, 0, 262146, 1, 0, 262174, 1, 0, 262175, 1, 0, 327680, 1, 0, 327681, 1, 0, 327682, 1, 0, 327685, 536870912, 0, 327690, 0, 0, 327691, 0, 0, 327694, 0, 0, 327695, 0, 0, 327696, 0, 0, 327697, 0, 0, 327700, 0, 0, 327701, 0, 0, 327706, 536870912, 0, 327710, 1, 0, 327711, 1, 0, 393216, 1, 0, 393221, 536870913, 0, 393226, 1, 0, 393229, 0, 0, 393234, 0, 0, 393237, 1, 0, 393242, 536870913, 0, 393247, 1, 0, 458752, 1, 0, 458757, 536870913, 0, 458758, 0, 0, 458759, 0, 0, 458760, 0, 0, 458761, 0, 0, 458762, 1, 0, 458773, 1, 0, 458774, 0, 0, 458775, 0, 0, 458776, 0, 0, 458777, 0, 0, 458778, 536870913, 0, 458783, 1, 0, 524296, 1, 0, 524297, 1, 0, 524298, 1, 0, 524309, 1, 0, 524310, 1, 0, 524311, 1, 0, 589834, 1, 0, 589835, 0, 0, 589836, 2, 0, 589843, 536870914, 0, 589844, 0, 0, 589845, 1, 0, 655375, 536870912, 0, 655376, 536870912, 0, 720896, 0, 0, 720897, 0, 0, 720898, 0, 0, 720899, 0, 0, 720900, 2, 0, 720910, 536870912, 0, 720913, 536870912, 0, 720923, 0, 0, 720924, 0, 0, 720925, 0, 0, 720926, 0, 0, 720927, 0, 0, 786432, 1, 0, 786433, 1, 0, 786434, 1, 0, 786435, 1, 0, 786439, 0, 0, 786440, 0, 0, 786455, 0, 0, 786456, 0, 0, 786460, 1, 0, 786461, 1, 0, 786462, 1, 0, 786463, 1, 0, 851968, 1, 0, 851969, 1, 0, 851998, 1, 0, 851999, 1, 0, 917515, 0, 0, 917516, 0, 0, 917517, 0, 0, 917518, 2, 0, 917521, 536870914, 0, 917522, 0, 0, 917523, 0, 0, 917524, 0, 0, 983051, 1, 0, 983052, 1, 0, 983053, 1, 0, 983058, 1, 0, 983059, 1, 0, 983060, 1, 0, 1048583, 536870912, 0, 1048584, 0, 0, 1048585, 0, 0, 1048586, 0, 0, 1048597, 0, 0, 1048598, 0, 0, 1048599, 0, 0, 1048600, 536870912, 0, 1114112, 0, 0, 1114113, 0, 0, 1114114, 0, 0, 1114115, 0, 0, 1114119, 536870913, 0, 1114120, 536870913, 0, 1114121, 536870913, 0, 1114134, 536870913, 0, 1114135, 536870913, 0, 1114136, 536870913, 0, 1114140, 0, 0, 1114141, 0, 0, 1114142, 0, 0, 1114143, 0, 0, 1179648, 1, 0, 1179649, 1, 0, 1179650, 1, 0, 1179651, 1, 0, 1179676, 1, 0, 1179677, 1, 0, 1179678, 1, 0, 1179679, 1, 0, 1245184, 1, 0, 1245185, 1, 0, 1245186, 1, 0, 1245187, 1, 0, 1245198, 0, 0, 1245199, 0, 0, 1245200, 0, 0, 1245201, 0, 0, 1245212, 1, 0, 1245213, 1, 0, 1245214, 1, 0, 1245215, 1, 0, 1310720, 1, 0, 1310721, 1, 0, 1310722, 1, 0, 1310723, 1, 0, 1310724, 0, 0, 1310725, 0, 0, 1310726, 0, 0, 1310745, 0, 0, 1310746, 0, 0, 1310747, 0, 0, 1310748, 1, 0, 1310749, 1, 0, 1310750, 1, 0, 1310751, 1, 0, 1376256, 1, 0, 1376257, 1, 0, 1376258, 1, 0, 1376259, 1, 0, 1376260, 1, 0, 1376261, 1, 0, 1376262, 1, 0, 1376263, 0, 0, 1376264, 0, 0, 1376265, 0, 0, 1376266, 0, 0, 1376277, 0, 0, 1376278, 0, 0, 1376279, 0, 0, 1376280, 0, 0, 1376281, 1, 0, 1376282, 1, 0, 1376283, 1, 0, 1376284, 1, 0, 1376285, 1, 0, 1376286, 1, 0, 1376287, 1, 0, 1441792, 1, 0, 1441793, 1, 0, 1441794, 1, 0, 1441795, 1, 0, 1441796, 1, 0, 1441797, 1, 0, 1441798, 1, 0, 1441799, 1, 0, 1441800, 1, 0, 1441801, 1, 0, 1441802, 1, 0, 1441813, 1, 0, 1441814, 1, 0, 1441815, 1, 0, 1441816, 1, 0, 1441817, 1, 0, 1441818, 1, 0, 1441819, 1, 0, 1441820, 1, 0, 1441821, 1, 0, 1441822, 1, 0, 1441823, 1, 0, 1507328, 1, 0, 1507329, 1, 0, 1507330, 1, 0, 1507331, 1, 0, 1507332, 1, 0, 1507333, 1, 0, 1507334, 1, 0, 1507335, 1, 0, 1507336, 1, 0, 1507337, 1, 0, 1507338, 1, 0, 1507339, 0, 0, 1507340, 0, 0, 1507341, 0, 0, 1507346, 0, 0, 1507347, 0, 0, 1507348, 0, 0, 1507349, 1, 0, 1507350, 1, 0, 1507351, 1, 0, 1507352, 1, 0, 1507353, 1, 0, 1507354, 1, 0, 1507355, 1, 0, 1507356, 1, 0, 1507357, 1, 0, 1507358, 1, 0, 1507359, 1, 0 )
+
+[node name="Tutorial" type="CanvasLayer" parent="." index="6"]
+pause_mode = 2
+script = ExtResource( 2 )
+
+[node name="ReferenceImage" type="Sprite" parent="Tutorial" index="0"]
+visible = false
+modulate = Color( 1, 1, 1, 0.392157 )
+scale = Vector2( 0.8, 0.8 )
+texture = ExtResource( 3 )
+centered = false
+
+[node name="Batch0" type="Node2D" parent="Tutorial" index="1"]
+editor/display_folded = true
+visible = false
+
+[node name="Health" type="Sprite" parent="Tutorial/Batch0" index="0"]
+editor/display_folded = true
+position = Vector2( 322.421, 33.9667 )
+texture = ExtResource( 4 )
+centered = false
+region_enabled = true
+region_rect = Rect2( 0, 0, 200, 25 )
+
+[node name="Label" type="Label" parent="Tutorial/Batch0/Health" index="0"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+custom_fonts/font = ExtResource( 5 )
+custom_colors/font_color = Color( 0, 0, 0, 1 )
+text = "This is your health"
+align = 1
+valign = 1
+
+[node name="Sprite" type="Sprite" parent="Tutorial/Batch0/Health" index="1"]
+show_behind_parent = true
+position = Vector2( -2.98157, 11.5756 )
+scale = Vector2( 0.25, 0.25 )
+texture = ExtResource( 6 )
+
+[node name="Oxygen" type="Sprite" parent="Tutorial/Batch0" index="1"]
+editor/display_folded = true
+position = Vector2( 265.478, 71.0904 )
+texture = ExtResource( 4 )
+centered = false
+region_enabled = true
+region_rect = Rect2( 0, 0, 100, 25 )
+
+[node name="Label" type="Label" parent="Tutorial/Batch0/Oxygen" index="0"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+custom_fonts/font = ExtResource( 5 )
+custom_colors/font_color = Color( 0, 0, 0, 1 )
+text = "Oxygen"
+align = 1
+valign = 1
+
+[node name="Sprite" type="Sprite" parent="Tutorial/Batch0/Oxygen" index="1"]
+show_behind_parent = true
+position = Vector2( -3.3324, 13.3294 )
+scale = Vector2( 0.25, 0.25 )
+texture = ExtResource( 6 )
+
+[node name="Heat" type="Sprite" parent="Tutorial/Batch0" index="2"]
+editor/display_folded = true
+position = Vector2( 255.481, 97.2012 )
+texture = ExtResource( 4 )
+centered = false
+region_enabled = true
+region_rect = Rect2( 0, 0, 100, 25 )
+
+[node name="Label" type="Label" parent="Tutorial/Batch0/Heat" index="0"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+custom_fonts/font = ExtResource( 5 )
+custom_colors/font_color = Color( 0, 0, 0, 1 )
+text = "Heat"
+align = 1
+valign = 1
+
+[node name="Sprite" type="Sprite" parent="Tutorial/Batch0/Heat" index="1"]
+show_behind_parent = true
+position = Vector2( -3.3324, 13.3294 )
+scale = Vector2( 0.25, 0.25 )
+texture = ExtResource( 6 )
+
+[node name="Water" type="Sprite" parent="Tutorial/Batch0" index="3"]
+editor/display_folded = true
+position = Vector2( 244.149, 124.423 )
+texture = ExtResource( 4 )
+centered = false
+region_enabled = true
+region_rect = Rect2( 0, 0, 100, 25 )
+
+[node name="Label" type="Label" parent="Tutorial/Batch0/Water" index="0"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+custom_fonts/font = ExtResource( 5 )
+custom_colors/font_color = Color( 0, 0, 0, 1 )
+text = "Water"
+align = 1
+valign = 1
+
+[node name="Sprite" type="Sprite" parent="Tutorial/Batch0/Water" index="1"]
+show_behind_parent = true
+position = Vector2( -3.3324, 13.3294 )
+scale = Vector2( 0.25, 0.25 )
+texture = ExtResource( 6 )
+
+[node name="SaplingCounter" type="Sprite" parent="Tutorial/Batch0" index="4"]
+editor/display_folded = true
+position = Vector2( 13.8065, 184.055 )
+texture = ExtResource( 4 )
+centered = false
+region_enabled = true
+region_rect = Rect2( 0, 0, 150, 120 )
+
+[node name="Label" type="Label" parent="Tutorial/Batch0/SaplingCounter" index="0"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+custom_fonts/font = ExtResource( 5 )
+custom_colors/font_color = Color( 0, 0, 0, 1 )
+text = "How many seeds you have (required for planting trees)"
+align = 1
+valign = 1
+autowrap = true
+
+[node name="Sprite" type="Sprite" parent="Tutorial/Batch0/SaplingCounter" index="1"]
+show_behind_parent = true
+position = Vector2( 69.1611, -6.54773 )
+rotation = 1.5708
+scale = Vector2( 0.25, 0.25 )
+texture = ExtResource( 6 )
+
+[node name="General" type="Sprite" parent="Tutorial/Batch0" index="5"]
+self_modulate = Color( 1, 0.521569, 0.521569, 1 )
+position = Vector2( 381.353, 317.535 )
+texture = ExtResource( 4 )
+centered = false
+region_enabled = true
+region_rect = Rect2( 0, 0, 300, 150 )
+
+[node name="Label" type="Label" parent="Tutorial/Batch0/General" index="0"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+custom_fonts/font = ExtResource( 5 )
+custom_colors/font_color = Color( 0.137255, 0, 0, 1 )
+text = "Objective: survive. 
+Oxygen too low = suffocation
+Heat too low = freeze to death
+Heat too high = also bad
+Not enough water = very bad"
+align = 1
+valign = 1
+autowrap = true
+
+[node name="Instructions" type="Sprite" parent="Tutorial/Batch0" index="6"]
+editor/display_folded = true
+self_modulate = Color( 0.509804, 0.509804, 0.509804, 1 )
+position = Vector2( 405.53, 481.249 )
+texture = ExtResource( 4 )
+centered = false
+region_enabled = true
+region_rect = Rect2( 0, 0, 250, 25 )
+
+[node name="Label" type="Label" parent="Tutorial/Batch0/Instructions" index="0"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+custom_fonts/font = ExtResource( 5 )
+custom_colors/font_color = Color( 0.811765, 0.811765, 0.811765, 1 )
+text = "Press ENTER to continue"
+align = 1
+valign = 1
+
+[node name="Batch1" type="Node2D" parent="Tutorial" index="2"]
+visible = false
+
+[node name="Weapons" type="Sprite" parent="Tutorial/Batch1" index="0"]
+editor/display_folded = true
+position = Vector2( 565.707, 232.409 )
+texture = ExtResource( 4 )
+centered = false
+region_enabled = true
+region_rect = Rect2( 0, 0, 200, 120 )
+
+[node name="Label" type="Label" parent="Tutorial/Batch1/Weapons" index="0"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+custom_fonts/font = ExtResource( 5 )
+custom_colors/font_color = Color( 0, 0, 0, 1 )
+text = "Pick up \"weapons\" by walking past them. This one shoots seeds - try the others for yourself!"
+align = 1
+valign = 1
+autowrap = true
+
+[node name="Sprite" type="Sprite" parent="Tutorial/Batch1/Weapons" index="1"]
+show_behind_parent = true
+position = Vector2( -1.75049, 58.4292 )
+scale = Vector2( 0.25, 0.25 )
+texture = ExtResource( 6 )
+
+[node name="Instructions2" type="Sprite" parent="Tutorial/Batch1" index="1"]
+editor/display_folded = true
+self_modulate = Color( 0.509804, 0.509804, 0.509804, 1 )
+position = Vector2( 544.61, 365.554 )
+texture = ExtResource( 4 )
+centered = false
+region_enabled = true
+region_rect = Rect2( 0, 0, 250, 25 )
+
+[node name="Label" type="Label" parent="Tutorial/Batch1/Instructions2" index="0"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+custom_fonts/font = ExtResource( 5 )
+custom_colors/font_color = Color( 0.811765, 0.811765, 0.811765, 1 )
+text = "Press ENTER to continue"
+align = 1
+valign = 1
+
+[node name="PauseScreen" parent="." index="7"]
+editor/display_folded = false

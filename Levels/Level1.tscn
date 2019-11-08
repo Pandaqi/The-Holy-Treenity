@@ -1,0 +1,120 @@
+[gd_scene load_steps=3 format=2]
+
+[ext_resource path="res://Levels/LevelSkeleton.tscn" type="PackedScene" id=1]
+[ext_resource path="res://Bullets/LogStatic.tscn" type="PackedScene" id=2]
+
+[node name="Node2D" index="0" instance=ExtResource( 1 )]
+player_positions = PoolVector2Array( 9, 5, 9, 19, 22, 5, 22, 9 )
+weapon_positions = PoolVector2Array( 13, 2, 1, 19, 23, 4, 2, 5, 30, 15 )
+simulation_parameters = {
+"fire_heat_expelled": 0.2,
+"fire_oxygen_taken": -0.2,
+"fire_start_heat": 0.6,
+"fire_start_water": 0.4,
+"fire_stop_heat": 0.3,
+"fire_stop_water": 0.6,
+"fire_tree_damage": -0.01,
+"firebolt_heat_expelled": 0.75,
+"gas_exchange_rate": 0.1,
+"heat_floor": 0.35,
+"heat_retention_rate": 0.01,
+"player_drink_factor": 1.0,
+"player_drown_level": 0.75,
+"player_heat_expelled": 0.125,
+"player_heat_maximum": 0.85,
+"player_heat_minimum": 0.15,
+"player_oxygen_minimum": 0.15,
+"player_oxygen_taken": -0.15,
+"player_water_minimum": 0.15,
+"rain_delay": 10.0,
+"rain_threshold_factor": 40.0,
+"raindrop_mass": 0.005,
+"tree_default_growth_speed": 1.05,
+"tree_max_seed_time": 50,
+"tree_min_seed_time": 20,
+"tree_oxygen_expelled": 1.0,
+"tree_seed_drop_amount": 3,
+"tree_water_growth_factor": 0.35,
+"water_evaporation_factor": 0.1,
+"water_freeze_point": 0.3,
+"water_gun_shoot_amount": 1.0,
+"water_gun_suck_amount": 0.2,
+"water_melt_point": 0.3,
+"water_needed_for_freezing": 0.5
+}
+
+[node name="TileMap" parent="." index="2"]
+tile_data = PoolIntArray( 0, 1, 0, 1, 1, 0, 2, 1, 0, 7, 1, 0, 8, 1, 0, 9, 1, 0, 10, 1, 0, 11, 1, 0, 12, 1, 0, 13, 1, 0, 14, 1, 0, 15, 1, 0, 16, 1, 0, 17, 1, 0, 18, 1, 0, 19, 1, 0, 20, 1, 0, 21, 1, 0, 22, 1, 0, 23, 1, 0, 24, 1, 0, 29, 1, 0, 30, 1, 0, 31, 1, 0, 65536, 1, 0, 65537, 1, 0, 65538, 1, 0, 65543, 1, 0, 65544, 1, 0, 65545, 1, 0, 65546, 1, 0, 65557, 1, 0, 65558, 1, 0, 65559, 1, 0, 65560, 1, 0, 65565, 1, 0, 65566, 1, 0, 65567, 1, 0, 131072, 1, 0, 131073, 1, 0, 131074, 1, 0, 131075, 0, 0, 131079, 1, 0, 131080, 1, 0, 131081, 1, 0, 131082, 1, 0, 131093, 1, 0, 131094, 1, 0, 131095, 1, 0, 131096, 1, 0, 131100, 0, 0, 131101, 1, 0, 131102, 1, 0, 131103, 1, 0, 196622, 0, 0, 196623, 0, 0, 196624, 0, 0, 196625, 0, 0, 262157, 0, 0, 262158, 1, 0, 262161, 1, 0, 262162, 0, 0, 327692, 0, 0, 327693, 1, 0, 327698, 1, 0, 327699, 0, 0, 393227, 0, 0, 393228, 1, 0, 393235, 1, 0, 393236, 0, 0, 458752, 0, 0, 458753, 0, 0, 458754, 0, 0, 458758, 0, 0, 458759, 0, 0, 458760, 0, 0, 458761, 0, 0, 458762, 0, 0, 458763, 1, 0, 458767, 0, 0, 458768, 0, 0, 458772, 1, 0, 458773, 0, 0, 458774, 0, 0, 458775, 0, 0, 458776, 0, 0, 458777, 0, 0, 458781, 0, 0, 458782, 0, 0, 458783, 0, 0, 524288, 1, 0, 524289, 1, 0, 524290, 1, 0, 524295, 1, 0, 524296, 1, 0, 524297, 1, 0, 524298, 1, 0, 524309, 1, 0, 524310, 1, 0, 524311, 1, 0, 524312, 1, 0, 524317, 1, 0, 524318, 1, 0, 524319, 1, 0, 589824, 1, 0, 589825, 1, 0, 589826, 1, 0, 589831, 1, 0, 589832, 1, 0, 589833, 1, 0, 589834, 1, 0, 589845, 1, 0, 589846, 1, 0, 589847, 1, 0, 589848, 1, 0, 589853, 1, 0, 589854, 1, 0, 589855, 1, 0, 655360, 1, 0, 655361, 1, 0, 655362, 1, 0, 655367, 1, 0, 655368, 1, 0, 655369, 1, 0, 655370, 1, 0, 655372, 0, 0, 655373, 0, 0, 655378, 0, 0, 655379, 0, 0, 655381, 1, 0, 655382, 1, 0, 655383, 1, 0, 655384, 1, 0, 655389, 1, 0, 655390, 1, 0, 655391, 1, 0, 851968, 0, 0, 851969, 0, 0, 851970, 0, 0, 851971, 0, 0, 851975, 0, 0, 851976, 0, 0, 851977, 0, 0, 851978, 0, 0, 851982, 0, 0, 851983, 0, 0, 851984, 0, 0, 851985, 0, 0, 851989, 0, 0, 851990, 0, 0, 851991, 0, 0, 851992, 0, 0, 851996, 0, 0, 851997, 0, 0, 851998, 0, 0, 851999, 0, 0, 917504, 1, 0, 917505, 1, 0, 917506, 1, 0, 917511, 1, 0, 917512, 1, 0, 917513, 1, 0, 917514, 1, 0, 917517, 0, 0, 917522, 0, 0, 917525, 1, 0, 917526, 1, 0, 917527, 1, 0, 917528, 1, 0, 917533, 1, 0, 917534, 1, 0, 917535, 1, 0, 983040, 1, 0, 983041, 1, 0, 983042, 1, 0, 983047, 1, 0, 983048, 1, 0, 983049, 1, 0, 983050, 1, 0, 983061, 1, 0, 983062, 1, 0, 983063, 1, 0, 983064, 1, 0, 983069, 1, 0, 983070, 1, 0, 983071, 1, 0, 1048576, 1, 0, 1048577, 1, 0, 1048578, 1, 0, 1048583, 1, 0, 1048584, 1, 0, 1048585, 1, 0, 1048586, 1, 0, 1048587, 0, 0, 1048596, 0, 0, 1048597, 1, 0, 1048598, 1, 0, 1048599, 1, 0, 1048600, 1, 0, 1048605, 1, 0, 1048606, 1, 0, 1048607, 1, 0, 1114123, 1, 0, 1114124, 0, 0, 1114131, 0, 0, 1114132, 1, 0, 1179660, 1, 0, 1179661, 0, 0, 1179666, 0, 0, 1179667, 1, 0, 1245197, 1, 0, 1245198, 0, 0, 1245201, 0, 0, 1245202, 1, 0, 1310734, 1, 0, 1310735, 0, 0, 1310736, 0, 0, 1310737, 1, 0, 1376256, 0, 0, 1376257, 0, 0, 1376258, 0, 0, 1376262, 0, 0, 1376263, 0, 0, 1376264, 0, 0, 1376265, 0, 0, 1376266, 0, 0, 1376267, 0, 0, 1376276, 0, 0, 1376277, 0, 0, 1376278, 0, 0, 1376279, 0, 0, 1376280, 0, 0, 1376281, 0, 0, 1376285, 0, 0, 1376286, 0, 0, 1376287, 0, 0, 1441792, 1, 0, 1441793, 1, 0, 1441794, 1, 0, 1441799, 1, 0, 1441800, 1, 0, 1441801, 1, 0, 1441802, 1, 0, 1441803, 1, 0, 1441804, 0, 0, 1441811, 0, 0, 1441812, 1, 0, 1441813, 1, 0, 1441814, 1, 0, 1441815, 1, 0, 1441816, 1, 0, 1441821, 1, 0, 1441822, 1, 0, 1441823, 1, 0, 1507328, 1, 0, 1507329, 1, 0, 1507330, 1, 0, 1507335, 1, 0, 1507336, 1, 0, 1507337, 1, 0, 1507338, 1, 0, 1507339, 1, 0, 1507340, 1, 0, 1507341, 0, 0, 1507342, 0, 0, 1507343, 0, 0, 1507344, 0, 0, 1507345, 0, 0, 1507346, 0, 0, 1507347, 1, 0, 1507348, 1, 0, 1507349, 1, 0, 1507350, 1, 0, 1507351, 1, 0, 1507352, 1, 0, 1507357, 1, 0, 1507358, 1, 0, 1507359, 1, 0 )
+
+[node name="EnvironmentObjects" type="Node2D" parent="." index="4"]
+
+[node name="LogStaticVertical2" parent="EnvironmentObjects" index="0" instance=ExtResource( 2 )]
+position = Vector2( 527.683, 50 )
+rotation = 1.5708
+
+[node name="LogStaticVertical4" parent="EnvironmentObjects" index="1" instance=ExtResource( 2 )]
+position = Vector2( 494.655, 690 )
+rotation = 1.5708
+
+[node name="LogStaticVertical5" parent="EnvironmentObjects" index="2" instance=ExtResource( 2 )]
+position = Vector2( 340, 370 )
+rotation = 1.5708
+
+[node name="LogStaticVertical8" parent="EnvironmentObjects" index="3" instance=ExtResource( 2 )]
+position = Vector2( 690, 370 )
+rotation = 1.5708
+
+[node name="LogStaticVertical" parent="EnvironmentObjects" index="4" instance=ExtResource( 2 )]
+position = Vector2( 527.683, 78.2429 )
+rotation = 1.5708
+
+[node name="LogStaticVertical3" parent="EnvironmentObjects" index="5" instance=ExtResource( 2 )]
+position = Vector2( 494.655, 718.243 )
+rotation = 1.5708
+
+[node name="LogStaticVertical6" parent="EnvironmentObjects" index="6" instance=ExtResource( 2 )]
+position = Vector2( 340, 398.243 )
+rotation = 1.5708
+
+[node name="LogStaticVertical7" parent="EnvironmentObjects" index="7" instance=ExtResource( 2 )]
+position = Vector2( 690, 398.243 )
+rotation = 1.5708
+
+[node name="LogStatic" parent="EnvironmentObjects" index="8" instance=ExtResource( 2 )]
+position = Vector2( 112, 236.874 )
+
+[node name="LogStatic8" parent="EnvironmentObjects" index="9" instance=ExtResource( 2 )]
+position = Vector2( 145.579, 430.242 )
+
+[node name="LogStatic4" parent="EnvironmentObjects" index="10" instance=ExtResource( 2 )]
+position = Vector2( 848.419, 236.874 )
+
+[node name="LogStatic6" parent="EnvironmentObjects" index="11" instance=ExtResource( 2 )]
+position = Vector2( 818.313, 430.242 )
+
+[node name="LogStatic2" parent="EnvironmentObjects" index="12" instance=ExtResource( 2 )]
+position = Vector2( 144, 236.874 )
+
+[node name="LogStatic7" parent="EnvironmentObjects" index="13" instance=ExtResource( 2 )]
+position = Vector2( 177.579, 430.242 )
+
+[node name="LogStatic3" parent="EnvironmentObjects" index="14" instance=ExtResource( 2 )]
+position = Vector2( 880.419, 236.874 )
+
+[node name="LogStatic5" parent="EnvironmentObjects" index="15" instance=ExtResource( 2 )]
+position = Vector2( 850.313, 430.242 )
+
+[node name="LogStatic11" parent="EnvironmentObjects" index="16" instance=ExtResource( 2 )]
+position = Vector2( 176, 236.874 )
+
+[node name="LogStatic14" parent="EnvironmentObjects" index="17" instance=ExtResource( 2 )]
+position = Vector2( 209.579, 430.242 )
+
+[node name="LogStatic12" parent="EnvironmentObjects" index="18" instance=ExtResource( 2 )]
+position = Vector2( 912.419, 236.874 )
+
+[node name="LogStatic13" parent="EnvironmentObjects" index="19" instance=ExtResource( 2 )]
+position = Vector2( 882.314, 430.242 )
+
+[node name="Interface" parent="." index="6"]
+editor/display_folded = false

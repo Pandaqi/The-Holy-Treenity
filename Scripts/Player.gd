@@ -467,14 +467,13 @@ func _integrate_forces(state):
 			if body == self:
 				continue
 			
-			# if we haven't just swapped ...
+			# if we haven't just swapped (swap is only reset once we're in the air again)...
 			# and we're standing on a player ...
 			# after falling down ...
 			# that counts as a weapon swap
 			elif not weapon_swap:
 				if body.is_in_group("Players") and abs(VELOCITY.y) >= 0:
 					swap_weapons(body)
-					break
 			
 			# if the body is ice, well, remember we're standing on ice
 			elif body.is_in_group("FreezedBlocks"):
@@ -500,7 +499,7 @@ func _integrate_forces(state):
 		sound_to_play = "ice_running"
 	
 	# if we're in the air ...
-	# yeah ... we hit ourselves with the area, that's why there's always a single body
+	# (yeah ... we hit ourselves with the area, that's why there's always a single body)
 	# still need to find a cleaner way to solve this in Godot
 	elif bodies_below_us.size() <= 1:
 		
