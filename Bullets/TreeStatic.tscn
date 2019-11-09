@@ -48,6 +48,7 @@ extents = Vector2( 32, 16 )
 [node name="Tree" type="StaticBody2D" groups=[
 "OxygenGivers",
 "GrowingObjects",
+"Trees",
 ]]
 collision_layer = 16
 collision_mask = 16

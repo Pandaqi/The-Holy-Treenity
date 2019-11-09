@@ -1,0 +1,76 @@
+[gd_scene load_steps=9 format=2]
+
+[ext_resource path="res://Scripts/Car.gd" type="Script" id=1]
+[ext_resource path="res://Textures/Characters/car.png" type="Texture" id=2]
+[ext_resource path="res://Textures/rain_particle.png" type="Texture" id=3]
+
+[sub_resource type="PhysicsMaterial" id=1]
+friction = 0.05
+
+[sub_resource type="Gradient" id=2]
+colors = PoolColorArray( 0.644531, 0.644531, 0.644531, 1, 0.0980392, 0.0980392, 0.0980392, 0 )
+
+[sub_resource type="GradientTexture" id=3]
+gradient = SubResource( 2 )
+
+[sub_resource type="ParticlesMaterial" id=4]
+flag_disable_z = true
+spread = 5.0
+gravity = Vector3( 0, 0, 0 )
+initial_velocity = 50.0
+orbit_velocity = 0.0
+orbit_velocity_random = 0.0
+scale = 4.0
+scale_random = 0.4
+color_ramp = SubResource( 3 )
+
+[sub_resource type="RectangleShape2D" id=5]
+extents = Vector2( 61.9541, 34.5777 )
+
+[node name="Car" type="RigidBody2D" groups=[
+"OxygenTakers",
+"WarmthGivers",
+]]
+position = Vector2( 114.843, 237.241 )
+collision_layer = 0
+collision_mask = 3
+mode = 2
+mass = 3.0
+physics_material_override = SubResource( 1 )
+script = ExtResource( 1 )
+
+[node name="Sprite" type="Sprite" parent="."]
+texture = ExtResource( 2 )
+
+[node name="Particles2D" type="Particles2D" parent="Sprite"]
+position = Vector2( -60.3087, 28.3082 )
+rotation = -1.57871
+process_material = SubResource( 4 )
+
+[node name="CollisionShape2D" type="CollisionPolygon2D" parent="."]
+polygon = PoolVector2Array( 60.668, 39.4247, 62.9377, 22.4016, 47.0495, 19.3753, 28.1349, -14.671, -20.2864, -18.0756, -44.1188, 16.7272, -53.5761, 17.4838, -50.928, 38.6681, -41.849, 38.6681, -32.3918, 49.2603, -20.6647, 38.6681, 25.8652, 38.6681, 36.4573, 49.6386, 47.0495, 38.2898 )
+
+[node name="FrontLight" type="Light2D" parent="."]
+visible = false
+position = Vector2( 60.0065, 25.7052 )
+rotation = 0.228572
+texture = ExtResource( 3 )
+color = Color( 1, 0.819608, 0, 1 )
+energy = 3.0
+
+[node name="BackLight" type="Light2D" parent="."]
+visible = false
+show_behind_parent = true
+position = Vector2( -46.5545, 19.6949 )
+rotation = -0.103502
+texture = ExtResource( 3 )
+color = Color( 1, 0, 0, 1 )
+energy = 3.0
+
+[node name="Area2D" type="Area2D" parent="."]
+collision_layer = 18
+collision_mask = 18
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Area2D"]
+position = Vector2( 0, 17.1425 )
+shape = SubResource( 5 )

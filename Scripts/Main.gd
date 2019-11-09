@@ -84,6 +84,28 @@ export (Dictionary) var simulation_parameters = {
 }
 
 func _ready():
+	# slightly randomize some simulation parameters
+	var keys = simulation_parameters.keys()
+	for key in keys: 
+		var temp_val = simulation_parameters[key]
+		
+		# we don't change parameters that are not between 0 and 1
+		# (because we can't easily clamp them, and I don't have time to write code for THAT)
+		if temp_val >= 1.0:
+			continue
+		
+		# otherwise, change the parameter by an amount proportional to default value
+		# also keep the sign of the old parameter
+		var change = temp_val * rand_range(-0.175, 0.175)
+		var old_sign = sign(temp_val)
+		
+		if old_sign > 0:
+			simulation_parameters[key] = clamp(temp_val + change, 0.005, 0.99)
+		else:
+			simulation_parameters[key] = clamp(temp_val + change, -0.99, -0.005)
+		
+		print(key, " || Old val: ", temp_val, " || New val: ", simulation_parameters[key])
+	
 	# set correct player count
 	players_alive = Global.player_count
 	
@@ -142,8 +164,6 @@ func _process(delta):
 			# CHeck if player position is within interface bounding box
 			if check_point_in_rect(occ, player.get_position() ):
 				hide_interface[i] = true
-			else:
-				hide_interface[i] = false
 	
 	# Once the results are in, go through all interfaces again and finally hide/show them
 	var counter = 0

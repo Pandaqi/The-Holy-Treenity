@@ -13,6 +13,17 @@ var saved_impulses = []
 
 var param = {}
 
+
+# LINKS ABOUT WATER/CELLULAR AUTOMATA
+# LINK: https://www.gamasutra.com/blogs/MattKlingensmith/20130811/198050/How_Water_Works_In_DwarfCorp.php
+#  => Using a flow vector might be a good idea
+
+# ALSO LINK: https://www.reddit.com/r/gamedev/comments/2048wv/help_with_cellular_automata_water/
+
+# LAST LINK ABOUT Cellular Automata: https://gamedev.stackexchange.com/questions/59278/how-would-i-go-about-programming-atmosphere-for-a-game
+
+# Eventually, I implemented a variation/improvement on the "simple fluid simulation" on w-shadow.com
+
 func _ready():
 	# Initialize timer
 	generation_timer = Timer.new()

@@ -32,25 +32,18 @@ func _draw():
 			var height = min(val, 1.0) * 32
 			var waterfall_drawn = false
 
+			# If this tile is NOT full ...
 			# Check if block above has water, if so, always set to full water
+			#  => this is what creates the waterfalls
 			var val_above = grid[ int(y - 1) % int(MAP_SIZE.y) ][x]
 			
-			if val_above.size() > 0 and val_above[2] != null:
-				if val_above[2] > 0:
-					height = 32
-					col = Color(0.5, 0.5, 1, 0.2)
-					waterfall_drawn = true
+			if val < 1.0:
+				if val_above.size() > 0 and val_above[2] != null:
+					if val_above[2] > 0:
+						height = 32
+						col = Color(0.5, 0.5, 1, 0.2)
+						waterfall_drawn = true
 
-			# TO DO: Use pressure => if a cell has a value higher than 8.0, we push water upwards
-			
-			# LINKS ABOUT WATER/CELLULAR AUTOMATA
-			# LINK: https://www.gamasutra.com/blogs/MattKlingensmith/20130811/198050/How_Water_Works_In_DwarfCorp.php
-			#  => Using a flow vector might be a good idea
-			
-			# ALSO LINK: https://www.reddit.com/r/gamedev/comments/2048wv/help_with_cellular_automata_water/
-			
-			# LAST LINK ABOUT Cellular Automata: https://gamedev.stackexchange.com/questions/59278/how-would-i-go-about-programming-atmosphere-for-a-game
-			
 			var rect = Rect2(Vector2(x * 32, (y+1) * 32 - height), Vector2(32, height))
 			draw_rect(rect, col)
 			

@@ -1,0 +1,178 @@
+[gd_scene load_steps=8 format=2]
+
+[ext_resource path="res://Levels/LevelSkeleton.tscn" type="PackedScene" id=1]
+[ext_resource path="res://Car.tscn" type="PackedScene" id=2]
+[ext_resource path="res://Bullets/TreeStatic.tscn" type="PackedScene" id=3]
+[ext_resource path="res://Scripts/Tutorial.gd" type="Script" id=4]
+[ext_resource path="res://Textures/PackageHealthBar.png" type="Texture" id=5]
+[ext_resource path="res://Interface/TinyDynamicFont.tres" type="DynamicFont" id=6]
+[ext_resource path="res://Textures/Interface/pointy_arrow.png" type="Texture" id=7]
+
+[node name="Node2D" index="0" instance=ExtResource( 1 )]
+simulation_parameters = {
+"fire_heat_expelled": 0.2,
+"fire_oxygen_taken": -0.2,
+"fire_start_heat": 0.6,
+"fire_start_water": 0.4,
+"fire_stop_heat": 0.3,
+"fire_stop_water": 0.6,
+"fire_tree_damage": -0.01,
+"firebolt_heat_expelled": 0.75,
+"gas_exchange_rate": 0.1,
+"heat_floor": 0.35,
+"heat_retention_rate": 0.01,
+"player_drink_factor": 1.0,
+"player_drown_level": 0.75,
+"player_heat_expelled": 0.125,
+"player_heat_maximum": 0.85,
+"player_heat_minimum": 0.15,
+"player_oxygen_minimum": 0.15,
+"player_oxygen_taken": -0.15,
+"player_water_minimum": 0.15,
+"rain_delay": 10,
+"rain_threshold_factor": 10.0,
+"raindrop_mass": 0.005,
+"tree_default_growth_speed": 1.05,
+"tree_max_seed_time": 50,
+"tree_min_seed_time": 20,
+"tree_oxygen_expelled": 0.8,
+"tree_seed_drop_amount": 3,
+"tree_water_growth_factor": 0.35,
+"water_evaporation_factor": 0.1,
+"water_freeze_point": 0.3,
+"water_gun_shoot_amount": 1.0,
+"water_gun_suck_amount": 0.2,
+"water_melt_point": 0.3,
+"water_needed_for_freezing": 0.5
+}
+
+[node name="TileMap" parent="." index="2"]
+tile_data = PoolIntArray( 196614, 0, 0, 196615, 0, 0, 196616, 0, 0, 196617, 0, 0, 196618, 0, 0, 196619, 0, 0, 196620, 0, 0, 196621, 0, 0, 196622, 0, 0, 196623, 0, 0, 196630, 0, 0, 196631, 0, 0, 196632, 0, 0, 196633, 0, 0, 196634, 0, 0, 196635, 0, 0, 196636, 0, 0, 196637, 0, 0, 196638, 0, 0, 196639, 0, 0, 262152, 1, 0, 262153, 1, 0, 262158, 1, 0, 262159, 1, 0, 262168, 1, 0, 262169, 1, 0, 262174, 1, 0, 262175, 1, 0, 327680, 0, 0, 327688, 1, 0, 327695, 1, 0, 327696, 0, 0, 327704, 1, 0, 327711, 1, 0, 589824, 0, 0, 589825, 0, 0, 589826, 0, 0, 589827, 0, 0, 589828, 0, 0, 589829, 0, 0, 589830, 0, 0, 589831, 0, 0, 589838, 0, 0, 589839, 0, 0, 589840, 0, 0, 589841, 0, 0, 589842, 0, 0, 589843, 0, 0, 589844, 0, 0, 589845, 0, 0, 589846, 0, 0, 589847, 0, 0, 589854, 0, 0, 589855, 0, 0, 655360, 1, 0, 655361, 1, 0, 655366, 1, 0, 655367, 1, 0, 655376, 1, 0, 655377, 1, 0, 655382, 1, 0, 655383, 1, 0, 720896, 1, 0, 720903, 1, 0, 720904, 0, 0, 720912, 1, 0, 720919, 1, 0, 720920, 0, 0, 983046, 0, 0, 983047, 0, 0, 983048, 0, 0, 983049, 0, 0, 983050, 0, 0, 983051, 0, 0, 983052, 0, 0, 983053, 0, 0, 983054, 0, 0, 983055, 0, 0, 983062, 0, 0, 983063, 0, 0, 983064, 0, 0, 983065, 0, 0, 983066, 0, 0, 983067, 0, 0, 983068, 0, 0, 983069, 0, 0, 983070, 0, 0, 983071, 0, 0, 1048584, 1, 0, 1048585, 1, 0, 1048590, 1, 0, 1048591, 1, 0, 1048600, 1, 0, 1048601, 1, 0, 1048606, 1, 0, 1048607, 1, 0, 1114112, 0, 0, 1114120, 1, 0, 1114127, 1, 0, 1114128, 0, 0, 1114136, 1, 0, 1114143, 1, 0, 1376256, 0, 0, 1376257, 0, 0, 1376258, 0, 0, 1376259, 0, 0, 1376260, 0, 0, 1376261, 0, 0, 1376262, 0, 0, 1376263, 0, 0, 1376270, 0, 0, 1376271, 0, 0, 1376272, 0, 0, 1376273, 0, 0, 1376274, 0, 0, 1376275, 0, 0, 1376276, 0, 0, 1376277, 0, 0, 1376278, 0, 0, 1376279, 0, 0, 1376286, 0, 0, 1376287, 0, 0, 1441792, 1, 0, 1441793, 1, 0, 1441798, 1, 0, 1441799, 1, 0, 1441808, 1, 0, 1441809, 1, 0, 1441814, 1, 0, 1441815, 1, 0, 1507328, 1, 0, 1507335, 1, 0, 1507336, 0, 0, 1507344, 1, 0, 1507351, 1, 0, 1507352, 0, 0 )
+
+[node name="Environment_Objects" type="Node2D" parent="." index="4"]
+
+[node name="Car" parent="Environment_Objects" index="0" instance=ExtResource( 2 )]
+
+[node name="Car2" parent="Environment_Objects" index="1" instance=ExtResource( 2 )]
+position = Vector2( 628.082, 233.549 )
+
+[node name="Car3" parent="Environment_Objects" index="2" instance=ExtResource( 2 )]
+position = Vector2( 642.852, 618.786 )
+
+[node name="Car4" parent="Environment_Objects" index="3" instance=ExtResource( 2 )]
+position = Vector2( 122.228, 621.248 )
+
+[node name="Car5" parent="Environment_Objects" index="4" instance=ExtResource( 2 )]
+position = Vector2( 372.078, 424.321 )
+
+[node name="Car6" parent="Environment_Objects" index="5" instance=ExtResource( 2 )]
+position = Vector2( 897.625, 428.014 )
+
+[node name="Tree" parent="Environment_Objects" index="6" instance=ExtResource( 3 )]
+position = Vector2( 311.426, 68.6477 )
+rotation = -1.5708
+
+[node name="Tree2" parent="Environment_Objects" index="7" instance=ExtResource( 3 )]
+position = Vector2( 835.493, 68.6477 )
+rotation = -1.5708
+
+[node name="Tree3" parent="Environment_Objects" index="8" instance=ExtResource( 3 )]
+position = Vector2( 246.127, 448.722 )
+rotation = -1.5708
+
+[node name="Tree12" parent="Environment_Objects" index="9" instance=ExtResource( 3 )]
+position = Vector2( 218.928, 643.652 )
+rotation = -1.5708
+
+[node name="Tree13" parent="Environment_Objects" index="10" instance=ExtResource( 3 )]
+position = Vector2( 512.079, 259.836 )
+rotation = -1.5708
+
+[node name="Tree14" parent="Environment_Objects" index="11" instance=ExtResource( 3 )]
+position = Vector2( 477.324, 453.255 )
+rotation = -1.5708
+
+[node name="Tree15" parent="Environment_Objects" index="12" instance=ExtResource( 3 )]
+position = Vector2( 1003.18, 451.744 )
+rotation = -1.5708
+
+[node name="Tree4" parent="Environment_Objects" index="13" instance=ExtResource( 3 )]
+position = Vector2( 743.405, 647.968 )
+rotation = -1.5708
+
+[node name="Tree5" parent="Environment_Objects" index="14" instance=ExtResource( 3 )]
+position = Vector2( 30.138, 637.922 )
+rotation = -1.5708
+
+[node name="Tree6" parent="Environment_Objects" index="15" instance=ExtResource( 3 )]
+position = Vector2( 750.102, 455.419 )
+rotation = -1.5708
+
+[node name="Tree7" parent="Environment_Objects" index="16" instance=ExtResource( 3 )]
+position = Vector2( 738.382, 271.242 )
+rotation = -1.5708
+
+[node name="Tree8" parent="Environment_Objects" index="17" instance=ExtResource( 3 )]
+position = Vector2( 986.183, 262.871 )
+rotation = -1.5708
+
+[node name="Tree9" parent="Environment_Objects" index="18" instance=ExtResource( 3 )]
+position = Vector2( 15.0692, 264.545 )
+rotation = -1.5708
+
+[node name="Tree10" parent="Environment_Objects" index="19" instance=ExtResource( 3 )]
+position = Vector2( 478.86, 654.665 )
+rotation = -1.5708
+
+[node name="Tree11" parent="Environment_Objects" index="20" instance=ExtResource( 3 )]
+position = Vector2( 979.486, 654.665 )
+rotation = -1.5708
+
+[node name="Tutorial" type="CanvasLayer" parent="." index="7"]
+pause_mode = 2
+script = ExtResource( 4 )
+
+[node name="Batch0" type="Node2D" parent="Tutorial" index="0"]
+editor/display_folded = true
+visible = false
+
+[node name="SaplingCounter" type="Sprite" parent="Tutorial/Batch0" index="0"]
+position = Vector2( 219.802, 184.055 )
+texture = ExtResource( 5 )
+centered = false
+region_enabled = true
+region_rect = Rect2( 0, 0, 300, 120 )
+
+[node name="Label" type="Label" parent="Tutorial/Batch0/SaplingCounter" index="0"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+custom_fonts/font = ExtResource( 6 )
+custom_colors/font_color = Color( 0, 0, 0, 1 )
+text = "Cars expel carbondioxide and increase heat. You might, however, be able to give them a push in the right direction ..."
+align = 1
+valign = 1
+autowrap = true
+
+[node name="Sprite" type="Sprite" parent="Tutorial/Batch0/SaplingCounter" index="1"]
+show_behind_parent = true
+position = Vector2( -7.27747, 59.5261 )
+scale = Vector2( 0.25, 0.25 )
+texture = ExtResource( 7 )
+
+[node name="Instructions" type="Sprite" parent="Tutorial/Batch0" index="1"]
+editor/display_folded = true
+self_modulate = Color( 0.509804, 0.509804, 0.509804, 1 )
+position = Vector2( 259.131, 334.85 )
+texture = ExtResource( 5 )
+centered = false
+region_enabled = true
+region_rect = Rect2( 0, 0, 250, 25 )
+
+[node name="Label" type="Label" parent="Tutorial/Batch0/Instructions" index="0"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+custom_fonts/font = ExtResource( 6 )
+custom_colors/font_color = Color( 0.811765, 0.811765, 0.811765, 1 )
+text = "Press ENTER to continue"
+align = 1
+valign = 1

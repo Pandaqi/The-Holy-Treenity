@@ -262,6 +262,14 @@ func new_generation():
 							var heat_floor = param.heat_floor
 							var diff = (heat_floor - cur_val[0])
 							cur_val[1] += diff * param.heat_retention_rate * UPDATE_SPEED
+						
+						# HOWEVER, water can "absorb" heat (both in the game and in the real world)
+						# As such, water will automatically reduce heat levels
+						# (Unlike the statement above, water does not "release heat" when it gets too cold
+						if cur_val[2] != null and cur_val[2] > 0.5:
+							var heat_floor = param.heat_floor
+							if cur_val[1] > heat_floor:
+								cur_val[1] = heat_floor
 				
 				# clamp the value between 0 and 1
 				cur_val[gas] = clamp(cur_val[gas], 0.0, 1.0)

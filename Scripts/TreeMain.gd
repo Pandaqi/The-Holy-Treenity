@@ -20,7 +20,8 @@ func drop_sapling():
 	# drop actual sapling (which you can pick up with the player)
 	var new_sapling = sapling_scene.instance()
 	
-	# disallow collision with the player
+	# disallow collision with its own tree
+	# new_sapling.add_collision_exception_with(self)
 	
 	# place sapling at center position, slight displaced
 	new_sapling.transform.origin = get_transformed_position() + Vector2(rand_range(0.2, -0.2), rand_range(0.2, -0.2))
