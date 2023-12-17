@@ -298,7 +298,7 @@ func new_generation():
 			# skip impenetrable blocks
 			if grid[y][x].size() == 0:
 				continue
-    
+	
 			# set flow and mass variables
 			flow = 0
 			remaining_mass = old_grid[y][x][2]
@@ -316,24 +316,24 @@ func new_generation():
 			var ind_below = (y + 1) % int(MAP_SIZE.y)
 			var ind_right = (x + 1) % int(MAP_SIZE.x)
 			var ind_above = (y - 1) % int(MAP_SIZE.y)
-	    
+		
 			###
 			# Check block below
 			###
 			if old_grid[ind_below][x].size() > 0 and old_grid[ind_below][x][2] != null:
 				flow = get_stable_state_b( remaining_mass + old_grid[ind_below][x][2] ) - old_grid[ind_below][x][2]
-	     
+		 
 				# ... doing this leads to a smoother flow
 				if flow > MinFlow: flow *= 0.5
 	
 				# clamp flow
 				flow = clamp( flow, 0, min(MaxSpeed, remaining_mass) )
-	    
+		
 				# update values
 				grid[y][x][2] -= flow
 				grid[ind_below][x][2] += flow   
 				remaining_mass -= flow
-	    
+		
 			if remaining_mass <= 0: continue
 	  
 			###
@@ -345,14 +345,14 @@ func new_generation():
 			if old_grid[y][ind_left].size() > 0 and old_grid[y][ind_left][2] != null and grid[y][ind_left][2] != null:
 				# equalize the amount of water in this block and it's neighbour
 				flow = (old_grid[y][x][2] - old_grid[y][ind_left][2]) * 0.25
-	    
+		
 				if flow > MinFlow: flow *= 0.5
 				flow = clamp(flow, 0, remaining_mass)
-	       
+		   
 				grid[y][x][2] -= flow
 				grid[y][ind_left][2] += flow
 				remaining_mass -= flow
-	    
+		
 			if remaining_mass <= 0: continue
 			
 			###
@@ -361,14 +361,14 @@ func new_generation():
 			if old_grid[y][ind_right].size() > 0 and old_grid[y][ind_right][2] != null:
 				# equalize the amount of water in this block and it's neighbour
 				flow = (old_grid[y][x][2] - old_grid[y][ind_right][2]) * 0.25
-	    
+		
 				if flow > MinFlow: flow *= 0.5
 				flow = clamp(flow, 0, remaining_mass)
-	       
+		   
 				grid[y][x][2] -= flow
 				grid[y][ind_right][2] += flow
 				remaining_mass -= flow
-	    
+		
 			if remaining_mass <= 0: continue
 	
 			###
@@ -378,7 +378,7 @@ func new_generation():
 			###
 			if old_grid[ind_above][x].size() > 0 and old_grid[ind_above][x][2] != null:
 				flow = remaining_mass - get_stable_state_b( remaining_mass + old_grid[ind_above][x][2] )
-	    
+		
 				if flow > MinFlow: flow *= 0.5
 				flow = clamp( flow, 0, min(MaxSpeed, remaining_mass) )
 		
